@@ -1,0 +1,19 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Apply native OS line-endings on checkout of these files...
+*.cs            text diff=csharp
+*.gitignore     text
+*.gitmodules    text
+*.gitattributes text
+
+# Apply Unix-style LF line-endings on checkout of these files...
+*.meta   text eol=lf
+*.unity  text eol=lf
+*.asset  text eol=lf
+*.prefab text eol=lf
+*.txt	 text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.fbx    binary
+*.FBX    binary
