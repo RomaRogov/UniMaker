@@ -5,7 +5,7 @@
 		/* MOVE ACTIONS */
 
 		//Move
-		MoveFixes,
+		MoveFixed,
 		MoveFree,
 		MoveTowards,
 		SpeedHorizontal,
