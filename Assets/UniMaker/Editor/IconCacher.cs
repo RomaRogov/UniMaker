@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,48 +15,40 @@ namespace UniMaker
 		{
 			get
 			{
-				instance = new IconCacher();
+				if (instance == null)
+				{
+					instance = new IconCacher();
+				}
 				return instance;
 			}
 		}
 
-		private Dictionary<EventTypes, Texture> EventIcons;
-		private Dictionary<ActionTypes, Texture> ActionIcons;
+
+		private Dictionary<string, Dictionary<string, Texture>> Caches;
 
 		public IconCacher()
 		{
-			EventIcons = new Dictionary<EventTypes, Texture>();
-			ActionIcons = new Dictionary<ActionTypes, Texture>();
+			Caches = new Dictionary<string, Dictionary<string, Texture>>();
 		}
 
-		internal static Texture GetEventIcon(EventTypes type)
+		internal static Texture GetIcon<T>(T type)
 		{
-			if (!Instance.EventIcons.ContainsKey(type))
+			string enumType = typeof(T).ToString();
+			if (!Instance.Caches.ContainsKey(enumType))
 			{
-				Texture icon = (Texture)EditorGUIUtility.Load(iconFolderName + "\\" + type.ToString() + ".png");
+				Instance.Caches.Add(enumType, new Dictionary<string, Texture>());
+			}
+			if (!Instance.Caches[enumType].ContainsKey(type.ToString()))
+			{
+				Texture icon = (Texture)EditorGUIUtility.Load(iconFolderName + "\\" + enumType + "\\" + type.ToString() + ".png");
 				if (icon != null)
 				{
-					Instance.EventIcons.Add(type, icon);
+					Instance.Caches[enumType].Add(type.ToString(), icon);
 					return icon;
 				}
 				else return null;
 			}
-			return Instance.EventIcons[type];
-		}
-
-		internal static Texture GetActionIcon(ActionTypes type)
-		{
-			if (!Instance.ActionIcons.ContainsKey(type))
-			{
-				Texture icon = (Texture)EditorGUIUtility.Load(iconFolderName + "\\" + type.ToString() + ".png");
-				if (icon != null)
-				{
-					Instance.ActionIcons.Add(type, icon);
-					return icon;
-				}
-				else return null;
-			}
-			return Instance.ActionIcons[type];
+			return Instance.Caches[enumType][type.ToString()];
 		}
 
 	}

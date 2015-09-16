@@ -134,7 +134,7 @@
 
 		SetCursor,
 
-		//Give particles job for Mecanim, ok?
+		//Give particles job to Mecanim, ok?
 
 		//Draw actions not situable
 	}

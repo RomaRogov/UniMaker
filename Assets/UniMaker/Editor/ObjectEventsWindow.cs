@@ -59,7 +59,7 @@ namespace UniMaker
 			}
 			for (int i = 0; i < selectedObject.Events.Count; i++)
 			{
-				DrawEvent(IconCacher.GetEventIcon(selectedObject.Events[i].Type), selectedObject.Events[i].Type.ToString(), i);
+				DrawEvent(IconCacher.GetIcon<EventTypes>(selectedObject.Events[i].Type), selectedObject.Events[i].Type.ToString(), i);
 			}
 			EditorGUILayout.EndScrollView();
 			if (GUILayout.Button("Add event"))
@@ -89,6 +89,10 @@ namespace UniMaker
 			}
 			else
 			{
+				if (list == null)
+				{
+					SelectEvent(selectedObject.SelectedEventIndex);
+				}
 				list.DoLayoutList();
 			}
 			EditorGUILayout.EndVertical();
@@ -130,7 +134,7 @@ namespace UniMaker
 			{
 				GMakerObject.ActionInstance element = selectedObject.SelectedEvent.Actions[index];
 				rect.y -= 1;
-				EditorGUI.LabelField(new Rect(rect.x, rect.y, actionItemSize, actionItemSize), new GUIContent(IconCacher.GetActionIcon(element.Type)));
+				EditorGUI.LabelField(new Rect(rect.x, rect.y, actionItemSize, actionItemSize), new GUIContent(IconCacher.GetIcon<ActionTypes>(element.Type)));
 				rect.y += 3;
 				EditorGUI.LabelField(new Rect(rect.x + actionItemSize, rect.y, rect.width - actionItemSize, actionItemSize), element.Type.ToString());
 			};
