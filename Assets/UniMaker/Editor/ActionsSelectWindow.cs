@@ -10,26 +10,18 @@ namespace UniMaker
 	{
 		private const int itemSize = 24;
 
-		//private Vector2 scrollValue = Vector2.zero;
+		private Vector2 scrollValue = Vector2.zero;
 
-		private List<ActionTabTypes> normalTabs = new List<ActionTabTypes>() {
-			ActionTabTypes.TabMove,
-			ActionTabTypes.TabMainFirst,
-			ActionTabTypes.TabMainSecond,
-			ActionTabTypes.TabControl,
-			ActionTabTypes.TabScore,
-			ActionTabTypes.TabExtra
+		private Dictionary<ActionTabTypes, ActionTabTypes> tabs = new Dictionary<ActionTabTypes, ActionTabTypes>() {
+			{ ActionTabTypes.TabMove, ActionTabTypes.TabMoveActive },
+			{ ActionTabTypes.TabMainFirst, ActionTabTypes.TabMainFirstActive },
+			{ ActionTabTypes.TabMainSecond, ActionTabTypes.TabMainSecondActive },
+			{ ActionTabTypes.TabControl, ActionTabTypes.TabControlActive },
+			{ ActionTabTypes.TabScore, ActionTabTypes.TabScoreActive },
+			{ ActionTabTypes.TabExtra, ActionTabTypes.TabExtraActive }
 		};
+		private ActionTabTypes selectedTab = ActionTabTypes.TabMove;
 
-		private List<ActionTabTypes> activelTabs = new List<ActionTabTypes>() {
-			ActionTabTypes.TabMoveActive,
-			ActionTabTypes.TabMainFirstActive,
-			ActionTabTypes.TabMainSecondActive,
-			ActionTabTypes.TabControlActive,
-			ActionTabTypes.TabScoreActive,
-			ActionTabTypes.TabExtraActive
-		};
-        
         [MenuItem("UniMaker/Actions Selector")]
 		static void Init()
 		{
@@ -40,15 +32,28 @@ namespace UniMaker
 		void OnGUI()
 		{
 			EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-			DrawMoveTab();
+			scrollValue = EditorGUILayout.BeginScrollView(scrollValue, GUI.skin.box);
+			switch (selectedTab)
+			{
+				case ActionTabTypes.TabMove: 		DrawMoveTab(); 			break;
+				case ActionTabTypes.TabMainFirst: 	DrawMainFirstTab(); 	break;
+				case ActionTabTypes.TabMainSecond: 	DrawMainSecondTab(); 	break;
+				case ActionTabTypes.TabControl: 	DrawControlTab(); 		break;
+				case ActionTabTypes.TabScore: 		DrawScoreTab(); 		break;
+				case ActionTabTypes.TabExtra: 		DrawExtraTab(); 		break;
+			}
+			EditorGUILayout.EndScrollView();
 			GUILayout.Space(-5f);
 			EditorGUILayout.BeginVertical();
-			normalTabs.ForEach(x => 
+			foreach (KeyValuePair<ActionTabTypes, ActionTabTypes> kvp in tabs)
 			{
-				Texture tex = IconCacher.GetIcon<ActionTabTypes>(x);
-				GUILayout.Button(tex, GUI.skin.label);
+				Texture tex = IconCacher.GetIcon<ActionTabTypes>(selectedTab == kvp.Key ? kvp.Value : kvp.Key);
+				if (GUILayout.Button(tex, GUI.skin.label))
+				{
+					selectedTab = kvp.Key;
+				}
 				GUILayout.Space(-3f);
-			});
+			}
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndHorizontal();
 		}
@@ -82,7 +87,7 @@ namespace UniMaker
         
         private void DrawMoveTab()
 		{
-			GUILayout.BeginVertical(GUI.skin.box);
+			GUILayout.BeginVertical();
 			DrawTypeGrid("Move: ", move_moveTypes);
 			DrawTypeGrid("Jump: ", move_jumpTypes);
 			DrawTypeGrid("Step: ", move_stepTypes);
@@ -90,6 +95,154 @@ namespace UniMaker
 		}
 
 		/* MAIN, SET 1 TAB */
+
+		private List<ActionTypes> mainFirst_instances = new List<ActionTypes>() {
+			ActionTypes.CreateInstance,
+			ActionTypes.CreateMoving,
+			ActionTypes.CreateRandom,
+			ActionTypes.ChangeInstance, 
+			ActionTypes.DestroyInstance,
+			ActionTypes.DestroyAtPosition
+		};
+
+		private List<ActionTypes> mainFirst_sprites = new List<ActionTypes>() {
+			ActionTypes.ChangeSprite,
+			ActionTypes.TransformSprite,
+			ActionTypes.ColourSprite
+		};
+
+		private List<ActionTypes> mainFirst_sounds = new List<ActionTypes>() {
+			ActionTypes.PlaySound,
+			ActionTypes.StopSound,
+			ActionTypes.CheckSound
+		};
+
+		private List<ActionTypes> mainFirst_scenes = new List<ActionTypes>() {
+			ActionTypes.PreviousScene,
+			ActionTypes.NextScene,
+			ActionTypes.RestartScene,
+			ActionTypes.DifferentScene,
+			ActionTypes.CheckPreviousScene,
+			ActionTypes.CheckNextScene
+		};
+
+		private void DrawMainFirstTab()
+		{
+			GUILayout.BeginVertical();
+			DrawTypeGrid("Objects: ", mainFirst_instances);
+			DrawTypeGrid("Sprite: ", mainFirst_sprites);
+			DrawTypeGrid("Sounds: ", mainFirst_sounds);
+			DrawTypeGrid("Scenes: ", mainFirst_scenes);
+			GUILayout.EndVertical();
+		}
+
+		/* MAIN, SET 2 TAB */
+
+		private List<ActionTypes> mainSecond_timing = new List<ActionTypes>() {
+			ActionTypes.SetAlarm
+		};
+
+		private List<ActionTypes> mainSecond_info = new List<ActionTypes>() {
+			ActionTypes.DisplayMessage,
+			ActionTypes.URLOpen
+		};
+
+		private List<ActionTypes> mainSecond_game = new List<ActionTypes>() {
+			ActionTypes.RestartGame,
+			ActionTypes.EndGame
+		};
+
+		private void DrawMainSecondTab()
+		{
+			GUILayout.BeginVertical();
+			DrawTypeGrid("Timing: ", mainSecond_timing);
+			DrawTypeGrid("Info: ", mainSecond_info);
+			DrawTypeGrid("Game: ", mainSecond_game);
+			GUILayout.EndVertical();
+		}
+
+		/* CONTROL TAB */
+
+		private List<ActionTypes> control_questions = new List<ActionTypes>() {
+			ActionTypes.CheckEmpty,
+			ActionTypes.CheckCollision,
+			ActionTypes.CheckObject,
+			ActionTypes.TestInstanceCount,
+			ActionTypes.TestChance,
+			ActionTypes.CheckQuestion,
+			ActionTypes.CheckMouse,
+			ActionTypes.CheckGrid
+		};
+
+		private List<ActionTypes> control_other = new List<ActionTypes>() {
+			ActionTypes.StartBlock,
+			ActionTypes.Else,
+			ActionTypes.ExitEvent,
+			ActionTypes.EndBlock,
+			ActionTypes.Repeat
+		};
+
+		private List<ActionTypes> control_code = new List<ActionTypes>() {
+			ActionTypes.ExecuteCode,
+			ActionTypes.ExecuteScript,
+			ActionTypes.Comment
+		};
+
+		private List<ActionTypes> control_variables = new List<ActionTypes>() {
+			ActionTypes.SetVariable,
+			ActionTypes.TestVariable
+		};
+
+		private void DrawControlTab()
+		{
+			GUILayout.BeginVertical();
+			DrawTypeGrid("Questions: ", control_questions);
+			DrawTypeGrid("Other: ", control_other);
+			DrawTypeGrid("Code: ", control_code);
+			DrawTypeGrid("Variables: ", control_variables);
+			GUILayout.EndVertical();
+		}
+
+		/* SCORE TAB */
+
+		private List<ActionTypes> score_score = new List<ActionTypes>() {
+			ActionTypes.SetScore,
+			ActionTypes.TestScore
+		};
+
+		private List<ActionTypes> score_lives = new List<ActionTypes>() {
+			ActionTypes.SetLives,
+			ActionTypes.TestLives
+		};
+
+		private List<ActionTypes> score_health = new List<ActionTypes>() {
+			ActionTypes.SetHealth,
+			ActionTypes.TestHealth
+		};
+
+		private void DrawScoreTab()
+		{
+			GUILayout.BeginVertical();
+			DrawTypeGrid("Score: ", score_score);
+			DrawTypeGrid("Lives: ", score_lives);
+			DrawTypeGrid("Health: ", score_health);
+			GUILayout.EndVertical();
+		}
+
+		/* EXTRA TAB */
+
+		private List<ActionTypes> extra_other = new List<ActionTypes>() {
+			ActionTypes.SetCursor,
+		};
+
+		private void DrawExtraTab()
+		{
+			GUILayout.BeginVertical();
+			DrawTypeGrid("Other: ", extra_other);
+			GUILayout.EndVertical();
+		}
+
+		/* END OF TAB LIST */
 
 		private int DrawTypeGrid(string title, List<ActionTypes> listToDraw)
 		{
