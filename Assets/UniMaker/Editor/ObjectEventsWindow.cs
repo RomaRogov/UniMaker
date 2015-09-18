@@ -81,8 +81,34 @@ namespace UniMaker
 			EditorGUILayout.EndHorizontal();
 			EditorGUILayout.EndVertical();
 
-			EditorGUILayout.BeginVertical();
+			Rect dropArea = EditorGUILayout.BeginVertical();
 			EditorGUILayout.LabelField("Actions:");
+
+			if (dropArea.Contains(Event.current.mousePosition))
+			{
+				object data = null;
+				switch(Event.current.type)
+				{
+					case EventType.DragUpdated:
+						data = DragAndDrop.GetGenericData("ActionTypes");
+	                    if (data is ActionTypes)
+						{
+							DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+						}
+						break;
+
+					case EventType.DragPerform:
+						data = DragAndDrop.GetGenericData("ActionTypes");
+						if (data is ActionTypes && (selectedObject.Events.Count > 0))
+						{
+							DragAndDrop.AcceptDrag();
+							selectedObject.SelectedEvent.Actions.Add(new GMakerObject.ActionInstance((ActionTypes)data));
+							DragAndDrop.SetGenericData("ActionTypes", null);
+						}
+						break;
+				}
+			}
+			
 			if (selectedObject.Events.Count == 0)
 			{
 				DrawLabelInCenter("No event selected");
@@ -140,7 +166,12 @@ namespace UniMaker
 			};
 			list.onAddCallback = (l) =>
 			{
-				selectedObject.SelectedEvent.Actions.Add(new GMakerObject.ActionInstance(ActionTypes.ExecuteCode));
+				ActionsSelectWindow wnd = EditorWindow.GetWindow<ActionsSelectWindow>("Actions");
+				wnd.Show();
+			};
+			list.drawHeaderCallback = (Rect rect) =>
+			{
+				GUI.Label(rect, "Drag actions here");
 			};
 		}
 

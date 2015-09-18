@@ -22,6 +22,8 @@ namespace UniMaker
 		};
 		private ActionTabTypes selectedTab = ActionTabTypes.TabMove;
 
+		private ActionTypes actionToDrag = ActionTypes.None;
+
         [MenuItem("UniMaker/Actions Selector")]
 		static void Init()
 		{
@@ -31,6 +33,22 @@ namespace UniMaker
 		
 		void OnGUI()
 		{
+			if (Event.current.type == EventType.MouseDrag && (actionToDrag != ActionTypes.None))
+			{
+				DragAndDrop.PrepareStartDrag();
+				DragAndDrop.SetGenericData("ActionTypes", actionToDrag);
+				DragAndDrop.paths = null;
+				DragAndDrop.objectReferences = new Object[0];
+
+				DragAndDrop.StartDrag(actionToDrag.ToString());
+
+				Event.current.Use();
+			}
+			if (Event.current.type == EventType.DragExited)
+			{
+ 				actionToDrag = ActionTypes.None;
+			}
+
 			EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 			scrollValue = EditorGUILayout.BeginScrollView(scrollValue, GUI.skin.box);
 			switch (selectedTab)
@@ -244,10 +262,27 @@ namespace UniMaker
 
 		/* END OF TAB LIST */
 
-		private int DrawTypeGrid(string title, List<ActionTypes> listToDraw)
+		private void DrawTypeGrid(string title, List<ActionTypes> listToDraw)
 		{
 			GUILayout.Label(title);
-			return GUILayout.SelectionGrid(999, listToDraw.ConvertAll(x => {return IconCacher.GetIcon<ActionTypes>(x);}).ToArray(), 3 );
+
+			int column = 0;
+
+			EditorGUILayout.BeginHorizontal();
+			foreach (ActionTypes type in listToDraw)
+			{
+				if (GUILayout.RepeatButton(IconCacher.GetIcon<ActionTypes>(type), GUILayout.ExpandWidth(false)) && Event.current.type == EventType.Repaint)
+				{
+					actionToDrag = type;
+				}
+				if (++column == 3)
+				{
+					column = 0;
+					EditorGUILayout.EndHorizontal();
+					EditorGUILayout.BeginHorizontal();
+				}
+			}
+			EditorGUILayout.EndHorizontal();
 		}
 
 		private static void DrawLabelInCenter(string text)

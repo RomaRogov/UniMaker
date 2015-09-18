@@ -2,6 +2,8 @@
 {
 	public enum ActionTypes
 	{
+		None,
+
 		/* MOVE ACTIONS */
 
 		//Move
