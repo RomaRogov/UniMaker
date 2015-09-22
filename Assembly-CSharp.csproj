@@ -45,9 +45,14 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\UniMaker\ActionBase.cs" />
      <Compile Include="Assets\UniMaker\ActionTabTypes.cs" />
      <Compile Include="Assets\UniMaker\ActionTypes.cs" />
+     <Compile Include="Assets\UniMaker\Actions\ActionJumpToPosition.cs" />
+     <Compile Include="Assets\UniMaker\Actions\ActionMoveFixed.cs" />
+     <Compile Include="Assets\UniMaker\Actions\ActionMoveFree.cs" />
      <Compile Include="Assets\UniMaker\EventTypes.cs" />
+     <Compile Include="Assets\UniMaker\GMLHelper.cs" />
      <Compile Include="Assets\UniMaker\GMakerObject.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>

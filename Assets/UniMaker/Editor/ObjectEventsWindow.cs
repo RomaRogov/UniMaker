@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
+using System;
 using System.Collections;
 
 namespace UniMaker
@@ -9,9 +10,12 @@ namespace UniMaker
 	{
 		private const int itemSize = 20;
 		private const int actionItemSize = 24;
+		private const float doubleClickTime = 0.3f;
 
 		private Vector2 scrollValue = Vector2.zero;
 		private GMakerObject selectedObject;
+		private int? lastSelectedIndex = null;
+		private double lastClickTime = 0;
 
 		private ReorderableList list;
 
@@ -102,7 +106,7 @@ namespace UniMaker
 						if (data is ActionTypes && (selectedObject.Events.Count > 0))
 						{
 							DragAndDrop.AcceptDrag();
-							selectedObject.SelectedEvent.Actions.Add(new GMakerObject.ActionInstance((ActionTypes)data));
+							selectedObject.SelectedEvent.Actions.Add(GetActionInstanceByType((ActionTypes)data));
 							DragAndDrop.SetGenericData("ActionTypes", null);
 						}
 						break;
@@ -155,14 +159,14 @@ namespace UniMaker
 		{
 			selectedObject.SelectedEventIndex = selectIndex;
 
-			list = new ReorderableList(selectedObject.SelectedEvent.Actions, typeof(GMakerObject.ActionInstance));
+			list = new ReorderableList(selectedObject.SelectedEvent.Actions, typeof(ActionBase));
 			list.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
 			{
-				GMakerObject.ActionInstance element = selectedObject.SelectedEvent.Actions[index];
+				ActionBase element = selectedObject.SelectedEvent.Actions[index];
 				rect.y -= 1;
 				EditorGUI.LabelField(new Rect(rect.x, rect.y, actionItemSize, actionItemSize), new GUIContent(IconCacher.GetIcon<ActionTypes>(element.Type)));
 				rect.y += 3;
-				EditorGUI.LabelField(new Rect(rect.x + actionItemSize, rect.y, rect.width - actionItemSize, actionItemSize), element.Type.ToString());
+				EditorGUI.LabelField(new Rect(rect.x + actionItemSize, rect.y, rect.width - actionItemSize, actionItemSize), element.TextInList);
 			};
 			list.onAddCallback = (l) =>
 			{
@@ -172,6 +176,18 @@ namespace UniMaker
 			list.drawHeaderCallback = (Rect rect) =>
 			{
 				GUI.Label(rect, "Drag actions here");
+			};
+			list.onSelectCallback = (x) =>
+			{
+				if (lastSelectedIndex == x.index)
+				{
+					if ((EditorApplication.timeSinceStartup - lastClickTime) < doubleClickTime)
+					{
+						SetPropertiesWindow.Open(selectedObject.SelectedEvent.Actions[x.index]);
+					}
+				}
+				lastClickTime = EditorApplication.timeSinceStartup;
+				lastSelectedIndex = x.index;
 			};
 		}
 
@@ -186,6 +202,23 @@ namespace UniMaker
 			EditorGUILayout.EndHorizontal();
 			GUILayout.FlexibleSpace();
 			EditorGUILayout.EndVertical();
+		}
+
+		private static ActionBase GetActionInstanceByType(ActionTypes type)
+		{
+			ScriptableObject instanceToReturn = null;
+			if (AssetDatabase.FindAssets("Action" + type.ToString()).Length > 0)
+			{
+				instanceToReturn = ScriptableObject.CreateInstance("Action" + type.ToString());
+			}
+			if (instanceToReturn != null && instanceToReturn is ActionBase)
+			{
+				return (ActionBase)instanceToReturn;
+			}
+			instanceToReturn = ScriptableObject.CreateInstance<ActionBase>();
+			((ActionBase)instanceToReturn).Type = ActionTypes.None;
+			((ActionBase)instanceToReturn).TextInList = "NOT DEFINED";
+			return (ActionBase)instanceToReturn;
 		}
 	}
 }

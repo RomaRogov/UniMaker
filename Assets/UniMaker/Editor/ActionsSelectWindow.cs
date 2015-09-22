@@ -271,7 +271,7 @@ namespace UniMaker
 			EditorGUILayout.BeginHorizontal();
 			foreach (ActionTypes type in listToDraw)
 			{
-				if (GUILayout.RepeatButton(IconCacher.GetIcon<ActionTypes>(type), GUILayout.ExpandWidth(false)) && Event.current.type == EventType.Repaint)
+				if (GUILayout.RepeatButton(new GUIContent(IconCacher.GetIcon<ActionTypes>(type), type.ToString()), GUILayout.ExpandWidth(false)) && Event.current.type == EventType.Repaint)
 				{
 					actionToDrag = type;
 				}
