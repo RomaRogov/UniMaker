@@ -46,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\UniMaker\Editor\ActionsSelectWindow.cs" />
-     <Compile Include="Assets\UniMaker\Editor\IconCacher.cs" />
      <Compile Include="Assets\UniMaker\Editor\ObjectEventsWindow.cs" />
      <Compile Include="Assets\UniMaker\Editor\SetPropertiesWindow.cs" />
  <Reference Include="UnityEditor.Advertisements">

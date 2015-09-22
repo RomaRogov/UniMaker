@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -13,7 +14,6 @@ namespace UniMaker
 		public bool JustStop = false;
 
 		private float[] directions = new float[9] { 135, 90, 45, 180, 0, 0, 225, 270, 315 };
-		private string[] captions = new string[9] { "\\", "^", "/", "<", "o", ">", "/", "V", "\\" }; //TODO: Temporary solution, change to icons!
 		private int selected = 5;
 
 		public ActionMoveFixed():base() { Type = ActionTypes.MoveFixed; TextInList = "Move Free"; }
@@ -35,16 +35,15 @@ namespace UniMaker
 		{
 			#if UNITY_EDITOR
 			EditorGUILayout.BeginVertical();
-			SerializedObject thisSerialized = new SerializedObject(this);
-
 			EditorGUILayout.LabelField("Direction: ");
-			EditorGUILayout.BeginHorizontal();
+
+			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			selected = GUILayout.SelectionGrid(selected, captions, 3);
+			selected = GUILayout.SelectionGrid(selected, new List<Directions>((Directions[])Enum.GetValues(typeof(Directions))).ConvertAll(x => IconCacher.GetIcon<Directions>(x)).ToArray(), 3);
 			if (selected != 4)
 			{
 				Direction = directions[selected];
-				TextInList = "Move to direction " + Direction.ToString() + " degrees";
+				TextInList = "Move " + Direction.ToString() + "\u00B0 with speed " + Speed.ToString();
 			}
 			else
 			{
@@ -52,7 +51,13 @@ namespace UniMaker
 				TextInList = "Stop";
 			}
 			GUILayout.FlexibleSpace();
-			EditorGUILayout.EndHorizontal();
+			GUILayout.EndHorizontal();
+
+			SerializedObject thisSerialized = new SerializedObject(this);
+			EditorGUILayout.Space();
+			EditorGUILayout.PropertyField(thisSerialized.FindProperty("Speed"));
+			thisSerialized.ApplyModifiedProperties();
+
 			EditorGUILayout.EndVertical();
 			#endif
 		}

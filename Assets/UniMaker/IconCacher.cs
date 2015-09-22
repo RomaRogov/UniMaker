@@ -31,7 +31,7 @@ namespace UniMaker
 			Caches = new Dictionary<string, Dictionary<string, Texture>>();
 		}
 
-		internal static Texture GetIcon<T>(T type)
+		public static Texture GetIcon<T>(T type)
 		{
 			string enumType = typeof(T).ToString();
 			if (!Instance.Caches.ContainsKey(enumType))

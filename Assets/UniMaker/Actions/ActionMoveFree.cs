@@ -11,6 +11,7 @@ namespace UniMaker
 	public class ActionMoveFree : ActionBase
 	{
 		public float Direction = 0;
+		public float Speed = 0;
 
 		public ActionMoveFree():base(ActionTypes.MoveFree) { TextInList = "Move Free"; }
 
@@ -25,12 +26,13 @@ namespace UniMaker
 			#if UNITY_EDITOR
 			EditorGUILayout.BeginVertical();
 			SerializedObject thisSerialized = new SerializedObject(this);
-
-			EditorGUILayout.LabelField("Direction: ");
+			EditorGUILayout.Space();
 			EditorGUILayout.PropertyField(thisSerialized.FindProperty("Direction"));
+			EditorGUILayout.Space();
+			EditorGUILayout.PropertyField(thisSerialized.FindProperty("Speed"));
 			EditorGUILayout.EndVertical();
 			thisSerialized.ApplyModifiedProperties();
-			TextInList = "Move to direction " + Direction.ToString() + " degrees";
+			TextInList = "Move " + Direction.ToString() + "\u00B0 with speed " + Speed.ToString();
 			#endif
 		}
 

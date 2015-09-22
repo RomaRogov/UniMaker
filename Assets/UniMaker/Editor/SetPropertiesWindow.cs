@@ -27,6 +27,18 @@ namespace UniMaker
 			{
 				Close();
 			}
+
+			GUILayout.FlexibleSpace();
+			EditorGUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button("OK", GUILayout.Width(100)))
+			{
+				Close();
+				EditorWindow.GetWindow<ObjectEventsWindow>().Repaint();
+			}
+			GUILayout.FlexibleSpace();
+			EditorGUILayout.EndHorizontal();
+			EditorGUILayout.Space();
 		}
 
 		private static void DrawLabelInCenter(string text)
