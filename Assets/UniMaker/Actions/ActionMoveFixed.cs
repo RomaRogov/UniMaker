@@ -13,7 +13,7 @@ namespace UniMaker
 	{
 		public bool JustStop = false;
 
-		private float[] directions = new float[9] { 135, 90, 45, 180, 0, 0, 225, 270, 315 };
+		private float[] directions = new float[9] { 135, 90, 45, 180, -1, 0, 225, 270, 315 };
 		private int selected = 5;
 
 		public ActionMoveFixed():base() { Type = ActionTypes.MoveFixed; TextInList = "Move Free"; }
@@ -40,8 +40,22 @@ namespace UniMaker
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			selected = GUILayout.SelectionGrid(selected, new List<Directions>((Directions[])Enum.GetValues(typeof(Directions))).ConvertAll(x => IconCacher.GetIcon<Directions>(x)).ToArray(), 3);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			EditorGUILayout.Space();
+			uiSpeed = EditorGUILayout.FloatField("Speed: ", uiSpeed);
+
+			EditorGUILayout.EndVertical();
+			#endif
+		}
+
+		public override void ApplyGUI ()
+		{
+			TextInList = "Move " + Direction.ToString() + "\u00B0 with speed " + Speed.ToString();
 			if (selected != 4)
 			{
+				JustStop = false;
 				Direction = directions[selected];
 				TextInList = "Move " + Direction.ToString() + "\u00B0 with speed " + Speed.ToString();
 			}
@@ -50,17 +64,38 @@ namespace UniMaker
 				JustStop = true;
 				TextInList = "Stop";
 			}
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			SerializedObject thisSerialized = new SerializedObject(this);
-			EditorGUILayout.Space();
-			EditorGUILayout.PropertyField(thisSerialized.FindProperty("Speed"));
-			thisSerialized.ApplyModifiedProperties();
-
-			EditorGUILayout.EndVertical();
-			#endif
+			Speed = uiSpeed;
+		}
+		
+		public override void ResetGUI ()
+		{
+			uiDirection = Direction;
+			if (JustStop)
+			{
+				selected = 4;
+			}
+			else
+			{
+				selected = Array.IndexOf<float>(directions, Direction);
+				if (selected < 0)
+				{
+					selected = 0;
+				}
+			}
+			uiSpeed = Speed;
 		}
 
+		internal override JSONObject GetJSON ()
+		{
+			JSONObject baseJSON = base.GetJSON ();
+			baseJSON.AddField("JustStop", JustStop);
+			return baseJSON;
+		}
+		
+		internal override void ParseJSON (JSONObject input)
+		{
+			base.ParseJSON (input);
+			JustStop = input["JustStop"].b;
+		}
 	}
 }

@@ -10,6 +10,9 @@ namespace UniMaker
 	[Serializable]
 	public class ActionMoveFree : ActionBase
 	{
+		protected float uiDirection = 0;
+		protected float uiSpeed = 0;
+
 		public float Direction = 0;
 		public float Speed = 0;
 
@@ -25,16 +28,40 @@ namespace UniMaker
 		{
 			#if UNITY_EDITOR
 			EditorGUILayout.BeginVertical();
-			SerializedObject thisSerialized = new SerializedObject(this);
 			EditorGUILayout.Space();
-			EditorGUILayout.PropertyField(thisSerialized.FindProperty("Direction"));
+			uiDirection = EditorGUILayout.FloatField("Direction: ", uiDirection);
 			EditorGUILayout.Space();
-			EditorGUILayout.PropertyField(thisSerialized.FindProperty("Speed"));
+			uiSpeed = EditorGUILayout.FloatField("Speed: ", uiSpeed);
 			EditorGUILayout.EndVertical();
-			thisSerialized.ApplyModifiedProperties();
-			TextInList = "Move " + Direction.ToString() + "\u00B0 with speed " + Speed.ToString();
 			#endif
 		}
 
+		public override void ApplyGUI ()
+		{
+			Direction = uiDirection;
+			Speed = uiSpeed;
+			TextInList = "Move " + Direction.ToString() + "\u00B0 with speed " + Speed.ToString();
+		}
+
+		public override void ResetGUI ()
+		{
+			uiDirection = Direction;
+			uiSpeed = Speed;
+		}
+
+		internal override JSONObject GetJSON ()
+		{
+			JSONObject baseJSON = base.GetJSON ();
+			baseJSON.AddField("Direction", Direction);
+			baseJSON.AddField("Speed", Speed);
+			return baseJSON;
+		}
+		
+		internal override void ParseJSON (JSONObject input)
+		{
+			base.ParseJSON (input);
+			Direction = input["Direction"].f;
+			Speed = input["Speed"].f;
+		}
 	}
 }

@@ -12,6 +12,11 @@ namespace UniMaker
         
 		internal static void Open(ActionBase actionToOpen)
 		{
+			if (actionToOpen != null)
+			{
+				actionToOpen.ResetGUI();
+			}
+
 			SetPropertiesWindow wnd = EditorWindow.GetWindow<SetPropertiesWindow>("Set Properties");
 			wnd.action = actionToOpen;
 			wnd.Show();
@@ -26,6 +31,7 @@ namespace UniMaker
 			else
 			{
 				Close();
+				return;
 			}
 
 			GUILayout.FlexibleSpace();
@@ -34,7 +40,10 @@ namespace UniMaker
 			if (GUILayout.Button("OK", GUILayout.Width(100)))
 			{
 				Close();
-				EditorWindow.GetWindow<ObjectEventsWindow>().Repaint();
+				action.ApplyGUI();
+				ObjectEventsWindow objWnd = EditorWindow.GetWindow<ObjectEventsWindow>();
+				objWnd.SetObjectDirty();
+				objWnd.Repaint();
 			}
 			GUILayout.FlexibleSpace();
 			EditorGUILayout.EndHorizontal();

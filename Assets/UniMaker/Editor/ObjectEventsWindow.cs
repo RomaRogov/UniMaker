@@ -25,13 +25,27 @@ namespace UniMaker
 			ObjectEventsWindow wnd = EditorWindow.GetWindow<ObjectEventsWindow>("Events");
 			wnd.OnSelectionChange();
 			wnd.Show();
+			PrefabUtility.prefabInstanceUpdated = (obj) =>
+			{
+				GMakerObject instanceToUpdate = obj.GetComponent<GMakerObject>();
+				if (instanceToUpdate != null)
+				{
+					instanceToUpdate.LoadDataFromJSON();
+				}
+			};
 		}
 
 		void OnSelectionChange()
 		{
 			if (Selection.activeObject is GameObject)
 			{
-				selectedObject = ((GameObject)Selection.activeObject).GetComponent<GMakerObject>();
+
+				GMakerObject objToSelect = ((GameObject)Selection.activeObject).GetComponent<GMakerObject>();
+				if ((objToSelect != null) && (selectedObject != objToSelect) && (objToSelect is GMakerObject))
+				{
+					objToSelect.LoadDataFromJSON();
+				}
+				selectedObject = objToSelect;
 				if ((selectedObject != null) && (selectedObject.Events.Count > 0))
 				{
 					SelectEvent(selectedObject.SelectedEventIndex);
@@ -70,6 +84,7 @@ namespace UniMaker
 			{
 				selectedObject.Events.Add(new GMakerObject.EventInstance(EventTypes.EventMouse));
 				SelectEvent(selectedObject.Events.Count - 1);
+				SetObjectDirty();
 			}
 			EditorGUILayout.BeginHorizontal();
 			if (GUILayout.Button("Delete"))
@@ -80,6 +95,7 @@ namespace UniMaker
 				{
 					SelectEvent(selectedObject.SelectedEventIndex);
 				}
+				SetObjectDirty();
 			}
 			GUILayout.Button("Change");
 			EditorGUILayout.EndHorizontal();
@@ -108,6 +124,7 @@ namespace UniMaker
 							DragAndDrop.AcceptDrag();
 							selectedObject.SelectedEvent.Actions.Add(GetActionInstanceByType((ActionTypes)data));
 							DragAndDrop.SetGenericData("ActionTypes", null);
+							SetObjectDirty();
 						}
 						break;
 				}
@@ -189,6 +206,16 @@ namespace UniMaker
 				lastClickTime = EditorApplication.timeSinceStartup;
 				lastSelectedIndex = x.index;
 			};
+			list.onChangedCallback = (l) => { SetObjectDirty(); };
+		}
+
+		internal void SetObjectDirty()
+		{
+			if (selectedObject != null)
+			{
+				selectedObject.SaveDataToJSON();
+				EditorUtility.SetDirty(selectedObject);
+			}
 		}
 
 		private static void DrawLabelInCenter(string text)
@@ -204,9 +231,10 @@ namespace UniMaker
 			EditorGUILayout.EndVertical();
 		}
 
-		private static ActionBase GetActionInstanceByType(ActionTypes type)
+		public static ActionBase GetActionInstanceByType(ActionTypes type)
 		{
-			ScriptableObject instanceToReturn = null;
+			return (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Action" + type.ToString()).Unwrap();
+			/*ScriptableObject instanceToReturn = null;
 			if (AssetDatabase.FindAssets("Action" + type.ToString()).Length > 0)
 			{
 				instanceToReturn = ScriptableObject.CreateInstance("Action" + type.ToString());
@@ -218,7 +246,7 @@ namespace UniMaker
 			instanceToReturn = ScriptableObject.CreateInstance<ActionBase>();
 			((ActionBase)instanceToReturn).Type = ActionTypes.None;
 			((ActionBase)instanceToReturn).TextInList = "NOT DEFINED";
-			return (ActionBase)instanceToReturn;
+			return (ActionBase)instanceToReturn;*/
 		}
 	}
 }

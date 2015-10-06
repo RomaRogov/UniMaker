@@ -5,7 +5,7 @@ using System.Collections;
 namespace UniMaker
 {
 	[Serializable]
-	public class ActionBase : ScriptableObject
+	public class ActionBase
 	{
 		public ActionTypes Type;
 		public string TextInList = "BASE ACTION";
@@ -24,8 +24,31 @@ namespace UniMaker
 
 		public virtual void DrawGUIProperty()
 		{
-			//Action-based classes shoud overload this method to draw and set GUI properties
+			//Action-based classes shoud overload this method to draw GUI properties
 		}
 
+		public virtual void ApplyGUI()
+		{
+			//Action-based classes shoud overload this method to apply GUI properties
+		}
+
+		public virtual void ResetGUI()
+		{
+			//Action-based classes shoud overload this method to reset GUI properties
+		}
+
+		internal virtual JSONObject GetJSON()
+		{
+			JSONObject myJson = new JSONObject();
+			myJson.AddField("Type", Type.ToString());
+			myJson.AddField("TextInList", TextInList);
+			return myJson;
+		}
+
+		internal virtual void ParseJSON(JSONObject input)
+		{
+			Type = (ActionTypes)Enum.Parse(typeof(ActionTypes), input["Type"].str);
+			TextInList = input["TextInList"].str;
+		}
 	}
 }

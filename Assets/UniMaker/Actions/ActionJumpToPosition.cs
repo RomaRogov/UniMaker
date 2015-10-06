@@ -10,6 +10,8 @@ namespace UniMaker
 	[Serializable]
 	public class ActionJumpToPosition : ActionBase
 	{
+		public Vector2 uiPosition;
+
 		public Vector2 Position;
 
 		public ActionJumpToPosition():base(ActionTypes.JumpToPosition) { TextInList = "Jump to position"; }
@@ -24,15 +26,35 @@ namespace UniMaker
 		{
 			#if UNITY_EDITOR
 			EditorGUILayout.BeginVertical();
-			SerializedObject thisSerialized = new SerializedObject(this);
 
-			EditorGUILayout.LabelField("Position: ");
-			EditorGUILayout.PropertyField(thisSerialized.FindProperty("Position"));
+			uiPosition = EditorGUILayout.Vector2Field("Position: ", uiPosition);
 			EditorGUILayout.EndVertical();
-			thisSerialized.ApplyModifiedProperties();
-			TextInList = "Jump to position (" + Position.x.ToString() + "; " + Position.y.ToString() + ")";
 			#endif
 		}
 
+		public override void ApplyGUI ()
+		{
+			Position = uiPosition;
+			TextInList = "Jump to position (" + Position.x.ToString() + "; " + Position.y.ToString() + ")";
+		}
+		
+		public override void ResetGUI ()
+		{
+			uiPosition = Position;
+		}
+
+		internal override JSONObject GetJSON ()
+		{
+			JSONObject baseJSON = base.GetJSON ();
+			baseJSON.AddField("Position_x", Position.x);
+			baseJSON.AddField("Position_y", Position.y);
+			return baseJSON;
+		}
+
+		internal override void ParseJSON (JSONObject input)
+		{
+			base.ParseJSON (input);
+			Position = new Vector2(input["Position_x"].f, input["Position_y"].f);
+		}
 	}
 }
