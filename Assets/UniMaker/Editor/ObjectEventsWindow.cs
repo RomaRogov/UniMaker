@@ -203,8 +203,9 @@ namespace UniMaker
 						SetPropertiesWindow.Open(selectedObject.SelectedEvent.Actions[x.index]);
 					}
 				}
-				lastClickTime = EditorApplication.timeSinceStartup;
+
 				lastSelectedIndex = x.index;
+				lastClickTime = EditorApplication.timeSinceStartup;
 			};
 			list.onChangedCallback = (l) => { SetObjectDirty(); };
 		}

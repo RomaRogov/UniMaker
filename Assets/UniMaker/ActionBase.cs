@@ -7,8 +7,16 @@ namespace UniMaker
 	[Serializable]
 	public class ActionBase
 	{
+		//Tiny hack, slashes for sure that it can't be prefab filename. You can name GO in scene like this, but what for?
+		public const string SelfAsTarget = "?SELF";
+		public const string OtherAsTarget = "?OTHER";
+
 		public ActionTypes Type;
+		public string TargetToApply = SelfAsTarget;
 		public string TextInList = "BASE ACTION";
+		public bool Relative = false;
+
+		public bool CanBeRelative = true;
 
 		public ActionBase(ActionTypes type)
 		{
@@ -41,14 +49,18 @@ namespace UniMaker
 		{
 			JSONObject myJson = new JSONObject();
 			myJson.AddField("Type", Type.ToString());
+			myJson.AddField("TargetToApply", TargetToApply);
 			myJson.AddField("TextInList", TextInList);
+			myJson.AddField("Relative", Relative.ToString());
 			return myJson;
 		}
 
 		internal virtual void ParseJSON(JSONObject input)
 		{
 			Type = (ActionTypes)Enum.Parse(typeof(ActionTypes), input["Type"].str);
+			TargetToApply = input["TargetToApply"].str;
 			TextInList = input["TextInList"].str;
+			Relative = input["Relative"].b;
 		}
 	}
 }

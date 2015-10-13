@@ -40,6 +40,7 @@ namespace UniMaker
 		
 		public override void ResetGUI ()
 		{
+			CanBeRelative = true;
 			uiPosition = Position;
 		}
 

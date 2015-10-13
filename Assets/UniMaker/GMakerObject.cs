@@ -2,6 +2,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UniMaker
 {
@@ -11,6 +14,13 @@ namespace UniMaker
 		public class EventInstance
 		{
 			public EventTypes Type;
+
+			//For collision event
+			public string Target;
+			//Fore some subevents (alarm id, mouse and keyboard buttons etc)
+			public int AdditionalID;
+
+
 			public List<ActionBase> Actions = new List<ActionBase>();
 			
 			public EventInstance(EventTypes type)
@@ -25,6 +35,7 @@ namespace UniMaker
 
 		public List<EventInstance> Events = new List<EventInstance>();
 		public EventInstance SelectedEvent { get { return Events[SelectedEventIndex]; } }
+		public string FabPath;
 
 		private void Awake()
 		{
@@ -94,6 +105,22 @@ namespace UniMaker
 
 		public void LoadDataFromJSON()
 		{
+			#if UNITY_EDITOR
+			string pathIfPrefab = AssetDatabase.GetAssetPath(PrefabUtility.GetPrefabObject(this));
+			string pathAsLinked = AssetDatabase.GetAssetPath(PrefabUtility.GetPrefabParent(gameObject));
+			if (!string.IsNullOrEmpty(pathIfPrefab) || !string.IsNullOrEmpty(pathAsLinked))
+			{
+				FabPath = string.IsNullOrEmpty(pathIfPrefab) ? pathAsLinked : pathIfPrefab;
+			}
+			else
+			{
+				if (string.IsNullOrEmpty(FabPath))
+				{
+					FabPath = gameObject.name;
+				}
+			}
+			#endif
+
 			if (string.IsNullOrEmpty(savedJSON))
 			{
 				return;

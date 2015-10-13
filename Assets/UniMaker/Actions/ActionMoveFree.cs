@@ -45,6 +45,7 @@ namespace UniMaker
 
 		public override void ResetGUI ()
 		{
+			CanBeRelative = false;
 			uiDirection = Direction;
 			uiSpeed = Speed;
 		}
