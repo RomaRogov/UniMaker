@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UniMaker.Actions;
 
 namespace UniMaker
 {
@@ -18,12 +19,12 @@ namespace UniMaker
 			{
 				actionToOpen.ResetGUI();
 			}
-
+            /*
 			SetPropertiesWindow wnd = EditorWindow.GetWindow<SetPropertiesWindow>(true, actionToOpen.Type.ToString());
 			wnd.action = actionToOpen;
 			wnd.GMObjectsToApply = new List<string>() { ActionBase.SelfAsTarget, ActionBase.OtherAsTarget };
 			wnd.GMObjectsToApply.AddRange(Array.ConvertAll<GMakerObject, string>(Resources.FindObjectsOfTypeAll<GMakerObject>(), x => x.FabPath));
-			wnd.ShowUtility();
+			wnd.ShowUtility();*/
 		}
 		
 		void OnGUI()
@@ -34,19 +35,16 @@ namespace UniMaker
 				return;
 			}
 
-			bool isSelf = action.TargetToApply == ActionBase.SelfAsTarget;
-			bool isOther = action.TargetToApply == ActionBase.OtherAsTarget;
-
 			EditorGUILayout.BeginHorizontal();
 			GUILayout.Label(IconCacher.GetIcon<ActionTypes>(action.Type));
 
 			EditorGUILayout.BeginVertical(GUI.skin.box);
-			EditorGUILayout.LabelField((isSelf || isOther) ? "Applies to" : "Applies to all instances of: ");
-			action.TargetToApply = 
+			//EditorGUILayout.LabelField((isSelf || isOther) ? "Applies to" : "Applies to all instances of: ");
+			/*action.TargetToApply = 
 				GMObjectsToApply[EditorGUILayout.Popup(GMObjectsToApply.IndexOf(action.TargetToApply),
 			                                           GMObjectsToApply.ConvertAll<string>(x => x
 			                                           	.Replace(ActionBase.SelfAsTarget, "Self")
-			                                           	.Replace(ActionBase.OtherAsTarget, "Other")).ToArray())];
+			                                           	.Replace(ActionBase.OtherAsTarget, "Other")).ToArray())];*/
 			EditorGUILayout.Space();
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndHorizontal();
@@ -56,6 +54,7 @@ namespace UniMaker
 
 			GUILayout.FlexibleSpace();
 
+            /*
 			if (action.CanBeRelative)
 			{
 				EditorGUILayout.BeginHorizontal();
@@ -66,7 +65,7 @@ namespace UniMaker
 
 				EditorGUILayout.Space();
 			}
-
+            */
 			EditorGUILayout.BeginHorizontal();
 			GUILayout.Space(5);
 			Color backup = GUI.backgroundColor;

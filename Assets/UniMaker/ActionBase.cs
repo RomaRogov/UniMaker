@@ -2,35 +2,25 @@
 using System;
 using System.Collections;
 
-namespace UniMaker
+namespace UniMaker.Actions
 {
-	[Serializable]
 	public class ActionBase
 	{
-		//Tiny hack, slashes for sure that it can't be prefab filename. You can name GO in scene like this, but what for?
-		public const string SelfAsTarget = "?SELF";
-		public const string OtherAsTarget = "?OTHER";
-
 		public ActionTypes Type;
-		public string TargetToApply = SelfAsTarget;
+        public string Content;
 		public string TextInList = "BASE ACTION";
-		public bool Relative = false;
-
-		public bool CanBeRelative = true;
 
 		public ActionBase(ActionTypes type)
 		{
-			Type = type;
-		}
-		
-		internal virtual bool Execute(GMakerObject obj)
-		{
-			//Action-based classes should overload this method to set actions
-			Debug.Log("Ececuted " + TextInList);
-			return true;
+            Debug.Log("New action!\nType:" + type.ToString());
 		}
 
-		public virtual void DrawGUIProperty()
+        public virtual void SetOptionsAndContent(string options, string content)
+        {
+            //Action-based classes shoud overload this method to draw GUI properties
+        }
+
+        public virtual void DrawGUIProperty()
 		{
 			//Action-based classes shoud overload this method to draw GUI properties
 		}
@@ -43,24 +33,6 @@ namespace UniMaker
 		public virtual void ResetGUI()
 		{
 			//Action-based classes shoud overload this method to reset GUI properties
-		}
-
-		internal virtual JSONObject GetJSON()
-		{
-			JSONObject myJson = new JSONObject();
-			myJson.AddField("Type", Type.ToString());
-			myJson.AddField("TargetToApply", TargetToApply);
-			myJson.AddField("TextInList", TextInList);
-			myJson.AddField("Relative", Relative.ToString());
-			return myJson;
-		}
-
-		internal virtual void ParseJSON(JSONObject input)
-		{
-			Type = (ActionTypes)Enum.Parse(typeof(ActionTypes), input["Type"].str);
-			TargetToApply = input["TargetToApply"].str;
-			TextInList = input["TextInList"].str;
-			Relative = input["Relative"].b;
 		}
 	}
 }

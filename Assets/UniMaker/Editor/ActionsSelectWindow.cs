@@ -51,6 +51,7 @@ namespace UniMaker
 
 			EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
 			scrollValue = EditorGUILayout.BeginScrollView(scrollValue, GUI.skin.box);
+            /*
 			switch (selectedTab)
 			{
 				case ActionTabTypes.TabMove: 		DrawMoveTab(); 			break;
@@ -60,6 +61,7 @@ namespace UniMaker
 				case ActionTabTypes.TabScore: 		DrawScoreTab(); 		break;
 				case ActionTabTypes.TabExtra: 		DrawExtraTab(); 		break;
 			}
+            */
 			EditorGUILayout.EndScrollView();
 			GUILayout.Space(-5f);
 			EditorGUILayout.BeginVertical();
@@ -76,8 +78,8 @@ namespace UniMaker
 			EditorGUILayout.EndHorizontal();
 		}
 
-		/* MOVE TAB */
-
+		/* MOVE TAB 
+        
 		private List<ActionTypes> move_moveTypes = new List<ActionTypes>() {
 			ActionTypes.MoveFixed,
 			ActionTypes.MoveFree,
@@ -112,7 +114,7 @@ namespace UniMaker
 			GUILayout.EndVertical();
 		}
 
-		/* MAIN, SET 1 TAB */
+		/* MAIN, SET 1 TAB 
 
 		private List<ActionTypes> mainFirst_instances = new List<ActionTypes>() {
 			ActionTypes.CreateInstance,
@@ -154,7 +156,7 @@ namespace UniMaker
 			GUILayout.EndVertical();
 		}
 
-		/* MAIN, SET 2 TAB */
+		/* MAIN, SET 2 TAB 
 
 		private List<ActionTypes> mainSecond_timing = new List<ActionTypes>() {
 			ActionTypes.SetAlarm
@@ -179,7 +181,7 @@ namespace UniMaker
 			GUILayout.EndVertical();
 		}
 
-		/* CONTROL TAB */
+		/* CONTROL TAB 
 
 		private List<ActionTypes> control_questions = new List<ActionTypes>() {
 			ActionTypes.CheckEmpty,
@@ -221,7 +223,7 @@ namespace UniMaker
 			GUILayout.EndVertical();
 		}
 
-		/* SCORE TAB */
+		/* SCORE TAB 
 
 		private List<ActionTypes> score_score = new List<ActionTypes>() {
 			ActionTypes.SetScore,
@@ -247,7 +249,7 @@ namespace UniMaker
 			GUILayout.EndVertical();
 		}
 
-		/* EXTRA TAB */
+		/* EXTRA TAB 
 
 		private List<ActionTypes> extra_other = new List<ActionTypes>() {
 			ActionTypes.SetCursor,

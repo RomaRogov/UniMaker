@@ -9,25 +9,27 @@ namespace UniMaker
 {
 	public class SelectEventWindow : EditorWindow
 	{
-		private GMakerObject target;
+		//private GMakerObject target;
 		private List<string> GMObjectsToCollide;
         
-		internal static void Open(GMakerObject targetGMObj)
+		/*internal static void Open(GMakerObject targetGMObj)
 		{
 			SelectEventWindow wnd = EditorWindow.GetWindow<SelectEventWindow>(true, "Select event");
 			wnd.target = targetGMObj;
 			wnd.GMObjectsToCollide = new List<string>() { "Any" };
 			wnd.GMObjectsToCollide.AddRange(Array.ConvertAll<GMakerObject, string>(Resources.FindObjectsOfTypeAll<GMakerObject>(), x => x.FabPath));
 			wnd.ShowUtility();
-		}
+		}*/
 		
 		void OnGUI()
 		{
+            /*
 			if (target == null)
 			{
 				Close();
 				return;
 			}
+            */
 
 			DrawLabelInCenter("Still in development");
 		}

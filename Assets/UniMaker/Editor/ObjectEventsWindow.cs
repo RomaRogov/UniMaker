@@ -2,64 +2,92 @@
 using UnityEditor;
 using UnityEditorInternal;
 using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Collections;
+using System.Collections.Generic;
+using UniMaker.Actions;
 
 namespace UniMaker
 {
-	public class ObjectEventsWindow : EditorWindow
+    public class ObjectEventsWindow : EditorWindow
 	{
 		private const int itemSize = 20;
 		private const int actionItemSize = 24;
 		private const float doubleClickTime = 0.3f;
 
 		private Vector2 scrollValue = Vector2.zero;
-		private GMakerObject selectedObject;
+		private List<UniEvent> eventList;
 		private int? lastSelectedIndex = null;
 		private double lastClickTime = 0;
 
 		private ReorderableList list;
 
-		[MenuItem("UniMaker/Events Inspector")]
+        private enum ParsingMode { USINGS, CLASS, ENDCLASS, EVENT, ENDEVENT };
+
+        [MenuItem("UniMaker/Events Inspector")]
 		static void Init()
 		{
 			ObjectEventsWindow wnd = EditorWindow.GetWindow<ObjectEventsWindow>("Events");
 			wnd.OnSelectionChange();
 			wnd.Show();
-			PrefabUtility.prefabInstanceUpdated = (obj) =>
-			{
-				GMakerObject instanceToUpdate = obj.GetComponent<GMakerObject>();
-				if (instanceToUpdate != null)
-				{
-					instanceToUpdate.LoadDataFromJSON();
-				}
-			};
 		}
 
 		void OnSelectionChange()
 		{
-			if (Selection.activeObject is GameObject)
-			{
+            if (Selection.activeObject is MonoScript)
+            {
+                eventList = new List<UniEvent>();
 
-				GMakerObject objToSelect = ((GameObject)Selection.activeObject).GetComponent<GMakerObject>();
-				if ((objToSelect != null) && (selectedObject != objToSelect) && (objToSelect is GMakerObject))
-				{
-					objToSelect.LoadDataFromJSON();
-				}
-				selectedObject = objToSelect;
-				if ((selectedObject != null) && (selectedObject.Events.Count > 0))
-				{
-					SelectEvent(selectedObject.SelectedEventIndex);
-				}
-			}
-			else
-			{
-				selectedObject = null;
-			}
+                MonoScript sel = (Selection.activeObject as MonoScript);
+
+                StringReader strReader = new StringReader(sel.text);
+                string currentLine = null;
+                string eventContent = "";
+                string eventOptions = null;
+                ParsingMode mode = ParsingMode.USINGS;
+
+                while((currentLine = strReader.ReadLine()) != null)
+                {
+                    currentLine = currentLine.TrimStart(new char[] { ' ', '\t' });
+
+                    if (currentLine.StartsWith("//USINGS")) { mode = ParsingMode.USINGS; continue; }
+                    if (currentLine.StartsWith("//CLASS")) { mode = ParsingMode.CLASS; continue; }
+                    if (currentLine.StartsWith("//ENDCLASS")) { mode = ParsingMode.ENDCLASS; continue; }
+                    if (currentLine.StartsWith("//EVENT"))
+                    {
+                        mode = ParsingMode.EVENT;
+                        eventOptions = currentLine.Substring(currentLine.IndexOf('%') + 1);
+                        continue;
+                    }
+                    if (currentLine.StartsWith("//ENDEVENT")) { mode = ParsingMode.ENDEVENT; continue; }
+
+                    switch (mode)
+                    {
+                        case ParsingMode.USINGS:
+                            //Add usings
+                            break;
+                        case ParsingMode.CLASS:
+                            //save class content mb? idk
+                            break;
+                        case ParsingMode.EVENT:
+                            eventContent += currentLine + "\n";
+                            break;
+                        case ParsingMode.ENDEVENT:
+                            eventList.Add(new UniEvent(eventOptions, eventContent));
+                            eventContent = "";
+                            break;
+                    }
+                }
+                strReader.Close();
+            }
+            
 			Repaint();
 		}
 		
 		void OnGUI()
 		{
+            /*
 			if (selectedObject == null)
 			{
 				DrawLabelInCenter("Select any GMakerObject");
@@ -145,10 +173,12 @@ namespace UniMaker
 			EditorGUILayout.EndVertical();
 
 			EditorGUILayout.EndHorizontal();
+            */
 		}
 
 		private void DrawEvent(Texture icon, string eventName, int index)
 		{
+            /*
 			bool active = index == selectedObject.SelectedEventIndex;
 
 			Color prevColor = GUI.backgroundColor;
@@ -170,10 +200,12 @@ namespace UniMaker
 	        EditorGUILayout.EndHorizontal();
 
 			GUI.backgroundColor = prevColor;
+            */
 		}
 
 		private void SelectEvent(int selectIndex)
 		{
+            /*
 			selectedObject.SelectedEventIndex = selectIndex;
 
 			list = new ReorderableList(selectedObject.SelectedEvent.Actions, typeof(ActionBase));
@@ -208,15 +240,18 @@ namespace UniMaker
 				lastClickTime = EditorApplication.timeSinceStartup;
 			};
 			list.onChangedCallback = (l) => { SetObjectDirty(); };
+            */
 		}
 
 		internal void SetObjectDirty()
 		{
+            /*
 			if (selectedObject != null)
 			{
 				selectedObject.SaveDataToJSON();
 				EditorUtility.SetDirty(selectedObject);
 			}
+            */
 		}
 
 		private static void DrawLabelInCenter(string text)
@@ -234,7 +269,7 @@ namespace UniMaker
 
 		public static ActionBase GetActionInstanceByType(ActionTypes type)
 		{
-			return (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Action" + type.ToString()).Unwrap();
+			return (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Action.Action" + type.ToString()).Unwrap();
 			/*ScriptableObject instanceToReturn = null;
 			if (AssetDatabase.FindAssets("Action" + type.ToString()).Length > 0)
 			{
