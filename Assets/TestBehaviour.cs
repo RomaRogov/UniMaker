@@ -1,11 +1,16 @@
 ﻿//USINGS
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 //CLASS
 public class TestBehaviour : UniBehaviour {
+    //PUBVAR%{"type"
+    int score = 5;
+    Dictionary<string,AudioClip> clipNames = new Dictionary<string, AudioClip>();
+    //PRIVARS
     //EVENT%{"type":"Start"}
     void Start () {
-    //ENDEVENT%
+    //ENDEVENT
     }
     //EVENT%{"type":"Update"}
     void Update () {

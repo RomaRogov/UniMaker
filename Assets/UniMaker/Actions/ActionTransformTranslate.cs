@@ -17,8 +17,8 @@ namespace UniMaker.Actions
 
         public override void SetOptionsAndContent(string options, string content)
         {
-            //DO SOMETHING
-            Debug.Log("Action options:" + options + "\nContent: " + content);
+            Options = new JSONObject(options);
+            Translation = new Vector3(Options.GetField("x").f, Options.GetField("y").f, Options.GetField("z").f);
             content = "transfrom.Translate(new Vector3(" + Translation.x.ToString() + "," + Translation.y.ToString() + "," + Translation.z.ToString() + "));";
         }
 

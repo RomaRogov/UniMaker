@@ -13,8 +13,6 @@ namespace UniMaker
 
         public UniEvent(string options, string content)
         {
-            Debug.Log("New event!\nOptions:" + options + "\nContent: " + content);
-
             JSONObject eventOptionsJSON = new JSONObject(options);
             Type = (EventTypes)Enum.Parse(typeof(EventTypes), eventOptionsJSON.GetField("type").str);
 

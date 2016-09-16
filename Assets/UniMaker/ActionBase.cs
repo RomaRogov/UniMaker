@@ -7,12 +7,13 @@ namespace UniMaker.Actions
 	public class ActionBase
 	{
 		public ActionTypes Type;
+        public JSONObject Options;
         public string Content;
 		public string TextInList = "BASE ACTION";
 
 		public ActionBase(ActionTypes type)
 		{
-            Debug.Log("New action!\nType:" + type.ToString());
+
 		}
 
         public virtual void SetOptionsAndContent(string options, string content)
