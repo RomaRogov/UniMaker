@@ -74,7 +74,7 @@ namespace UniMaker
 			{
 				Close();
 				action.ApplyGUI();
-				ObjectEventsWindow objWnd = EditorWindow.GetWindow<ObjectEventsWindow>();
+				UniEditorWindow objWnd = EditorWindow.GetWindow<UniEditorWindow>();
 				objWnd.SetObjectDirty();
 				objWnd.Repaint();
 			}

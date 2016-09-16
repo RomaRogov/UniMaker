@@ -10,7 +10,7 @@ using UniMaker.Actions;
 
 namespace UniMaker
 {
-    public class ObjectEventsWindow : EditorWindow
+    public class UniEditorWindow : EditorWindow
 	{
 		private const int itemSize = 20;
 		private const int actionItemSize = 24;
@@ -18,6 +18,7 @@ namespace UniMaker
 
 		private Vector2 scrollValue = Vector2.zero;
 		private List<UniEvent> eventList;
+        private int selectedEventIndex = 0;
 		private int? lastSelectedIndex = null;
 		private double lastClickTime = 0;
 
@@ -28,7 +29,7 @@ namespace UniMaker
         [MenuItem("UniMaker/Events Inspector")]
 		static void Init()
 		{
-			ObjectEventsWindow wnd = EditorWindow.GetWindow<ObjectEventsWindow>("Events");
+			UniEditorWindow wnd = EditorWindow.GetWindow<UniEditorWindow>("Events");
 			wnd.OnSelectionChange();
 			wnd.Show();
 		}
@@ -87,10 +88,9 @@ namespace UniMaker
 		
 		void OnGUI()
 		{
-            /*
-			if (selectedObject == null)
+			if (eventList == null)
 			{
-				DrawLabelInCenter("Select any GMakerObject");
+				DrawLabelInCenter("Select any UniBehaviour script");
 				return;
 			}
 
@@ -99,29 +99,29 @@ namespace UniMaker
 			EditorGUILayout.BeginVertical(GUILayout.Width(150));
 			EditorGUILayout.LabelField("Events:");
 			scrollValue = EditorGUILayout.BeginScrollView(scrollValue, GUI.skin.box);
-			if (selectedObject.Events.Count == 0)
+			if (eventList.Count == 0)
 			{
 				DrawLabelInCenter("No events here!\nAdd any?");
 			}
-			for (int i = 0; i < selectedObject.Events.Count; i++)
+			for (int i = 0; i < eventList.Count; i++)
 			{
-				DrawEvent(IconCacher.GetIcon<EventTypes>(selectedObject.Events[i].Type), selectedObject.Events[i].Type.ToString(), i);
+				DrawEvent(IconCacher.GetIcon<EventTypes>(eventList[i].Type), eventList[i].Type.ToString(), i);
 			}
 			EditorGUILayout.EndScrollView();
 			if (GUILayout.Button("Add event"))
 			{
-				selectedObject.Events.Add(new GMakerObject.EventInstance(EventTypes.EventMouse));
-				SelectEvent(selectedObject.Events.Count - 1);
+				eventList.Add(new UniEvent("{\"type\":\"" + "Start" + "\"}", ""));
+				SelectEvent(eventList.Count - 1);
 				SetObjectDirty();
 			}
 			EditorGUILayout.BeginHorizontal();
 			if (GUILayout.Button("Delete"))
 			{
-				selectedObject.Events.RemoveAt(selectedObject.SelectedEventIndex);
-				if (selectedObject.SelectedEventIndex > 0) { selectedObject.SelectedEventIndex--; }
-				if (selectedObject.Events.Count > 0)
+				eventList.RemoveAt(selectedEventIndex);
+				if (selectedEventIndex > 0) { selectedEventIndex--; }
+				if (eventList.Count > 0)
 				{
-					SelectEvent(selectedObject.SelectedEventIndex);
+					SelectEvent(selectedEventIndex);
 				}
 				SetObjectDirty();
 			}
@@ -147,10 +147,10 @@ namespace UniMaker
 
 					case EventType.DragPerform:
 						data = DragAndDrop.GetGenericData("ActionTypes");
-						if (data is ActionTypes && (selectedObject.Events.Count > 0))
+						if (data is ActionTypes && (eventList.Count > 0))
 						{
 							DragAndDrop.AcceptDrag();
-							selectedObject.SelectedEvent.Actions.Add(GetActionInstanceByType((ActionTypes)data));
+							eventList[selectedEventIndex].Actions.Add(GetActionInstanceByType((ActionTypes)data));
 							DragAndDrop.SetGenericData("ActionTypes", null);
 							SetObjectDirty();
 						}
@@ -158,7 +158,7 @@ namespace UniMaker
 				}
 			}
 			
-			if (selectedObject.Events.Count == 0)
+			if (eventList.Count == 0)
 			{
 				DrawLabelInCenter("No event selected");
 			}
@@ -166,20 +166,18 @@ namespace UniMaker
 			{
 				if (list == null)
 				{
-					SelectEvent(selectedObject.SelectedEventIndex);
+					SelectEvent(selectedEventIndex);
 				}
 				list.DoLayoutList();
 			}
 			EditorGUILayout.EndVertical();
 
 			EditorGUILayout.EndHorizontal();
-            */
 		}
 
 		private void DrawEvent(Texture icon, string eventName, int index)
 		{
-            /*
-			bool active = index == selectedObject.SelectedEventIndex;
+			bool active = index == selectedEventIndex;
 
 			Color prevColor = GUI.backgroundColor;
 			GUI.backgroundColor = active ? Color.blue : prevColor;
@@ -200,18 +198,16 @@ namespace UniMaker
 	        EditorGUILayout.EndHorizontal();
 
 			GUI.backgroundColor = prevColor;
-            */
 		}
 
 		private void SelectEvent(int selectIndex)
 		{
-            /*
-			selectedObject.SelectedEventIndex = selectIndex;
+			selectedEventIndex = selectIndex;
 
-			list = new ReorderableList(selectedObject.SelectedEvent.Actions, typeof(ActionBase));
+			list = new ReorderableList(eventList[selectedEventIndex].Actions, typeof(ActionBase));
 			list.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
 			{
-				ActionBase element = selectedObject.SelectedEvent.Actions[index];
+				ActionBase element = eventList[selectedEventIndex].Actions[index];
 				rect.y -= 1;
 				EditorGUI.LabelField(new Rect(rect.x, rect.y, actionItemSize, actionItemSize), new GUIContent(IconCacher.GetIcon<ActionTypes>(element.Type)));
 				rect.y += 3;
@@ -232,7 +228,7 @@ namespace UniMaker
 				{
 					if ((EditorApplication.timeSinceStartup - lastClickTime) < doubleClickTime)
 					{
-						SetPropertiesWindow.Open(selectedObject.SelectedEvent.Actions[x.index]);
+						SetPropertiesWindow.Open(eventList[selectedEventIndex].Actions[x.index]);
 					}
 				}
 
@@ -240,7 +236,6 @@ namespace UniMaker
 				lastClickTime = EditorApplication.timeSinceStartup;
 			};
 			list.onChangedCallback = (l) => { SetObjectDirty(); };
-            */
 		}
 
 		internal void SetObjectDirty()
@@ -269,20 +264,7 @@ namespace UniMaker
 
 		public static ActionBase GetActionInstanceByType(ActionTypes type)
 		{
-			return (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Action.Action" + type.ToString()).Unwrap();
-			/*ScriptableObject instanceToReturn = null;
-			if (AssetDatabase.FindAssets("Action" + type.ToString()).Length > 0)
-			{
-				instanceToReturn = ScriptableObject.CreateInstance("Action" + type.ToString());
-			}
-			if (instanceToReturn != null && instanceToReturn is ActionBase)
-			{
-				return (ActionBase)instanceToReturn;
-			}
-			instanceToReturn = ScriptableObject.CreateInstance<ActionBase>();
-			((ActionBase)instanceToReturn).Type = ActionTypes.None;
-			((ActionBase)instanceToReturn).TextInList = "NOT DEFINED";
-			return (ActionBase)instanceToReturn;*/
+			return (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Actions.Action" + type.ToString()).Unwrap();
 		}
 	}
 }

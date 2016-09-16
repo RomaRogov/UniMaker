@@ -41,7 +41,7 @@ namespace UniMaker
                 if (currentLine.StartsWith("//ENDACTION"))
                 {
                     JSONObject actionOptionsJSON = new JSONObject(actionOptions);
-                    ActionBase newAction = (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Action.Action" + actionOptionsJSON.GetField("type").str).Unwrap();
+                    ActionBase newAction = (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Actions.Action" + actionOptionsJSON.GetField("type").str).Unwrap();
                     newAction.SetOptionsAndContent(actionOptions, actionContent);
                     Actions.Add(newAction);
                 }
