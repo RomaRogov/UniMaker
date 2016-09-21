@@ -52,5 +52,28 @@ namespace UniMaker
 
             strReader.Close();
         }
+
+        public void CombineScript(StreamWriter strWriter)
+        {
+            string doubleTabSpaces = UniEditorAbstract.TabSpaces + UniEditorAbstract.TabSpaces;
+
+            //Write event data
+            strWriter.WriteLine(UniEditorAbstract.TabSpaces + UniEditorAbstract.EventBeginText + "%{\"type\":\"" + Type.ToString() + "\"}");
+            //Write method header
+            strWriter.WriteLine(UniEditorAbstract.TabSpaces + "void " + Type.ToString() + "() {");
+            //Write actions
+            Actions.ForEach(a =>
+            {
+                //Write action data
+                strWriter.WriteLine(doubleTabSpaces + UniEditorAbstract.ActionBeginText + "%" + a.Options.ToString());
+                //Write action content
+                strWriter.WriteLine(a.Content);
+                //Write action end
+                strWriter.WriteLine(doubleTabSpaces + UniEditorAbstract.ActionEndText);
+            });
+            //Write event end
+            strWriter.WriteLine(UniEditorAbstract.TabSpaces + UniEditorAbstract.EventEndText);
+            strWriter.WriteLine(UniEditorAbstract.TabSpaces + "}");
+        }
     }
 }

@@ -10,16 +10,34 @@ namespace UniMaker.Actions
 	public class ActionTransformTranslate : ActionBase
 	{
 		public Vector3 uiTranslation;
-
 		public Vector3 Translation;
 
-		public ActionTransformTranslate():base(ActionTypes.TransformTranslate) { TextInList = "Translate to"; }
+        protected override string FormContent()
+        {
+            return doubleTabSpaces + "transform.Translate(new Vector3(" + Translation.x.ToString() + "," + Translation.y.ToString() + "," + Translation.z.ToString() + "));";
+        }
+
+        protected override string FormText()
+        {
+            return TextInList = "Translate to (" + Translation.x.ToString() + "; " + Translation.y.ToString() + ")";
+        }
+
+        public ActionTransformTranslate():base(ActionTypes.TransformTranslate) {
+            Translation = new Vector3();
+            TextInList = FormText();
+            Content = FormContent();
+            Options = new JSONObject();
+            Options.AddField("type", Type.ToString());
+            Options.AddField("x", 0f);
+            Options.AddField("y", 0f);
+            Options.AddField("z", 0f);
+        }
 
         public override void SetOptionsAndContent(string options, string content)
         {
             Options = new JSONObject(options);
             Translation = new Vector3(Options.GetField("x").f, Options.GetField("y").f, Options.GetField("z").f);
-            content = "transfrom.Translate(new Vector3(" + Translation.x.ToString() + "," + Translation.y.ToString() + "," + Translation.z.ToString() + "));";
+            Content = FormContent();
         }
 
         public override void DrawGUIProperty ()
@@ -35,8 +53,9 @@ namespace UniMaker.Actions
 		public override void ApplyGUI ()
 		{
 			Translation = uiTranslation;
-			TextInList = "Jump to position (" + Translation.x.ToString() + "; " + Translation.y.ToString() + ")";
-		}
+			TextInList = "Translate to (" + Translation.x.ToString() + "; " + Translation.y.ToString() + ")";
+            Content = FormContent();
+        }
 		
 		public override void ResetGUI ()
 		{

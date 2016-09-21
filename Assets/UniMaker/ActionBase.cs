@@ -11,29 +11,19 @@ namespace UniMaker.Actions
         public string Content;
 		public string TextInList = "BASE ACTION";
 
-		public ActionBase(ActionTypes type)
-		{
+        protected string doubleTabSpaces = UniEditorAbstract.TabSpaces + UniEditorAbstract.TabSpaces;
 
+        public ActionBase(ActionTypes type)
+		{
+            Type = type;
 		}
 
-        public virtual void SetOptionsAndContent(string options, string content)
-        {
-            //Action-based classes shoud overload this method to draw GUI properties
-        }
+        protected virtual string FormContent() { return ""; }
+        protected virtual string FormText() { return ""; }
 
-        public virtual void DrawGUIProperty()
-		{
-			//Action-based classes shoud overload this method to draw GUI properties
-		}
-
-		public virtual void ApplyGUI()
-		{
-			//Action-based classes shoud overload this method to apply GUI properties
-		}
-
-		public virtual void ResetGUI()
-		{
-			//Action-based classes shoud overload this method to reset GUI properties
-		}
+        public virtual void SetOptionsAndContent(string options, string content) { }
+        public virtual void DrawGUIProperty() { }
+        public virtual void ApplyGUI() { }
+        public virtual void ResetGUI() { }
 	}
 }

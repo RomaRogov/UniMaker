@@ -17,14 +17,12 @@ namespace UniMaker
 		private const float doubleClickTime = 0.3f;
 
 		private Vector2 scrollValue = Vector2.zero;
-		private List<UniEvent> eventList;
+        private UniEditorAbstract data;
         private int selectedEventIndex = 0;
 		private int? lastSelectedIndex = null;
 		private double lastClickTime = 0;
 
 		private ReorderableList list;
-
-        private enum ParsingMode { USINGS, CLASS, ENDCLASS, EVENT, ENDEVENT };
 
         [MenuItem("UniMaker/Events Inspector")]
 		static void Init()
@@ -36,51 +34,18 @@ namespace UniMaker
 
 		void OnSelectionChange()
 		{
+            selectedEventIndex = 0;
+
+            if ((data != null) && !data.ParseFailed)
+            {
+                data.CombineScript(new StreamWriter(data.FileName, false));
+            }
+            data = null;
+
             if (Selection.activeObject is MonoScript)
             {
-                eventList = new List<UniEvent>();
-
-                MonoScript sel = (Selection.activeObject as MonoScript);
-
-                StringReader strReader = new StringReader(sel.text);
-                string currentLine = null;
-                string eventContent = "";
-                string eventOptions = null;
-                ParsingMode mode = ParsingMode.USINGS;
-
-                while((currentLine = strReader.ReadLine()) != null)
-                {
-                    currentLine = currentLine.TrimStart(new char[] { ' ', '\t' });
-
-                    if (currentLine.StartsWith("//USINGS")) { mode = ParsingMode.USINGS; continue; }
-                    if (currentLine.StartsWith("//CLASS")) { mode = ParsingMode.CLASS; continue; }
-                    if (currentLine.StartsWith("//ENDCLASS")) { mode = ParsingMode.ENDCLASS; continue; }
-                    if (currentLine.StartsWith("//EVENT"))
-                    {
-                        mode = ParsingMode.EVENT;
-                        eventOptions = currentLine.Substring(currentLine.IndexOf('%') + 1);
-                        continue;
-                    }
-                    if (currentLine.StartsWith("//ENDEVENT")) { mode = ParsingMode.ENDEVENT; continue; }
-
-                    switch (mode)
-                    {
-                        case ParsingMode.USINGS:
-                            //Add usings
-                            break;
-                        case ParsingMode.CLASS:
-                            //save class content mb? idk
-                            break;
-                        case ParsingMode.EVENT:
-                            eventContent += currentLine + "\n";
-                            break;
-                        case ParsingMode.ENDEVENT:
-                            eventList.Add(new UniEvent(eventOptions, eventContent));
-                            eventContent = "";
-                            break;
-                    }
-                }
-                strReader.Close();
+                UniEditorAbstract parsedScript = new UniEditorAbstract(((MonoScript)Selection.activeObject).text, AssetDatabase.GetAssetPath(Selection.activeObject));
+                if (!parsedScript.ParseFailed) { data = parsedScript; }
             }
             
 			Repaint();
@@ -88,7 +53,7 @@ namespace UniMaker
 		
 		void OnGUI()
 		{
-			if (eventList == null)
+			if (data == null)
 			{
 				DrawLabelInCenter("Select any UniBehaviour script");
 				return;
@@ -99,27 +64,27 @@ namespace UniMaker
 			EditorGUILayout.BeginVertical(GUILayout.Width(150));
 			EditorGUILayout.LabelField("Events:");
 			scrollValue = EditorGUILayout.BeginScrollView(scrollValue, GUI.skin.box);
-			if (eventList.Count == 0)
+			if (data.EventCount == 0)
 			{
 				DrawLabelInCenter("No events here!\nAdd any?");
 			}
-			for (int i = 0; i < eventList.Count; i++)
+			for (int i = 0; i < data.EventCount; i++)
 			{
-				DrawEvent(IconCacher.GetIcon<EventTypes>(eventList[i].Type), eventList[i].Type.ToString(), i);
+				DrawEvent(IconCacher.GetIcon<EventTypes>(data.Events[i].Type), data.Events[i].Type.ToString(), i);
 			}
 			EditorGUILayout.EndScrollView();
 			if (GUILayout.Button("Add event"))
 			{
-				eventList.Add(new UniEvent("{\"type\":\"" + "Start" + "\"}", ""));
-				SelectEvent(eventList.Count - 1);
+				data.Events.Add(new UniEvent("{\"type\":\"" + "Start" + "\"}", ""));
+				SelectEvent(data.EventCount - 1);
 				SetObjectDirty();
 			}
 			EditorGUILayout.BeginHorizontal();
 			if (GUILayout.Button("Delete"))
 			{
-				eventList.RemoveAt(selectedEventIndex);
+				data.Events.RemoveAt(selectedEventIndex);
 				if (selectedEventIndex > 0) { selectedEventIndex--; }
-				if (eventList.Count > 0)
+				if (data.EventCount > 0)
 				{
 					SelectEvent(selectedEventIndex);
 				}
@@ -134,23 +99,23 @@ namespace UniMaker
 
 			if (dropArea.Contains(Event.current.mousePosition))
 			{
-				object data = null;
+				object dropData = null;
 				switch(Event.current.type)
 				{
 					case EventType.DragUpdated:
-						data = DragAndDrop.GetGenericData("ActionTypes");
-	                    if (data is ActionTypes)
+                        dropData = DragAndDrop.GetGenericData("ActionTypes");
+	                    if (dropData is ActionTypes)
 						{
 							DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
 						}
 						break;
 
 					case EventType.DragPerform:
-						data = DragAndDrop.GetGenericData("ActionTypes");
-						if (data is ActionTypes && (eventList.Count > 0))
+                        dropData = DragAndDrop.GetGenericData("ActionTypes");
+						if (dropData is ActionTypes && (data.EventCount > 0))
 						{
 							DragAndDrop.AcceptDrag();
-							eventList[selectedEventIndex].Actions.Add(GetActionInstanceByType((ActionTypes)data));
+                            data.Events[selectedEventIndex].Actions.Add(GetActionInstanceByType((ActionTypes)dropData));
 							DragAndDrop.SetGenericData("ActionTypes", null);
 							SetObjectDirty();
 						}
@@ -158,7 +123,7 @@ namespace UniMaker
 				}
 			}
 			
-			if (eventList.Count == 0)
+			if (data.EventCount == 0)
 			{
 				DrawLabelInCenter("No event selected");
 			}
@@ -204,10 +169,10 @@ namespace UniMaker
 		{
 			selectedEventIndex = selectIndex;
 
-			list = new ReorderableList(eventList[selectedEventIndex].Actions, typeof(ActionBase));
+			list = new ReorderableList(data.Events[selectedEventIndex].Actions, typeof(ActionBase));
 			list.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
 			{
-				ActionBase element = eventList[selectedEventIndex].Actions[index];
+				ActionBase element = data.Events[selectedEventIndex].Actions[index];
 				rect.y -= 1;
 				EditorGUI.LabelField(new Rect(rect.x, rect.y, actionItemSize, actionItemSize), new GUIContent(IconCacher.GetIcon<ActionTypes>(element.Type)));
 				rect.y += 3;
@@ -228,7 +193,7 @@ namespace UniMaker
 				{
 					if ((EditorApplication.timeSinceStartup - lastClickTime) < doubleClickTime)
 					{
-						SetPropertiesWindow.Open(eventList[selectedEventIndex].Actions[x.index]);
+						SetPropertiesWindow.Open(data.Events[selectedEventIndex].Actions[x.index]);
 					}
 				}
 
