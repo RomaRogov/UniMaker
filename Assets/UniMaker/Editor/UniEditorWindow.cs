@@ -75,7 +75,7 @@ namespace UniMaker
 			EditorGUILayout.EndScrollView();
 			if (GUILayout.Button("Add event"))
 			{
-				data.Events.Add(new UniEvent("{\"type\":\"" + "Start" + "\"}", ""));
+				data.Events.Add(new UniEvent("{\"type\":\"" + "Update" + "\"}", ""));
 				SelectEvent(data.EventCount - 1);
 				SetObjectDirty();
 			}

@@ -6,6 +6,6 @@
 
 		/* MOVE ACTIONS */
 
-		TransformTranslate
+		Translate
 	}
 }

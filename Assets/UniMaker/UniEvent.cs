@@ -60,7 +60,14 @@ namespace UniMaker
             //Write event data
             strWriter.WriteLine(UniEditorAbstract.TabSpaces + UniEditorAbstract.EventBeginText + "%{\"type\":\"" + Type.ToString() + "\"}");
             //Write method header
-            strWriter.WriteLine(UniEditorAbstract.TabSpaces + "void " + Type.ToString() + "() {");
+            if (Type == EventTypes.Update)
+            {
+                strWriter.WriteLine(UniEditorAbstract.TabSpaces + "protected override void " + Type.ToString() + "() { base.Update();");
+            }
+            else
+            {
+                strWriter.WriteLine(UniEditorAbstract.TabSpaces + "void " + Type.ToString() + "() {");
+            }
             //Write actions
             Actions.ForEach(a =>
             {

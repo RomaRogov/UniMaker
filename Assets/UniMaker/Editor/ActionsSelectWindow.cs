@@ -57,7 +57,7 @@ namespace UniMaker
 		/* TRANSFORM TAB  */
         
 		private List<ActionTypes> move_positionTypes = new List<ActionTypes>() {
-			ActionTypes.TransformTranslate
+			ActionTypes.Translate
 		};
         
         private void DrawTransformTab()

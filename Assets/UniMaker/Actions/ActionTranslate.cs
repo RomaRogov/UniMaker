@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace UniMaker.Actions
 {
-	public class ActionTransformTranslate : ActionBase
+	public class ActionTranslate : ActionBase
 	{
 		public Vector3 uiTranslation;
 		public Vector3 Translation;
@@ -22,7 +22,7 @@ namespace UniMaker.Actions
             return TextInList = "Translate to (" + Translation.x.ToString() + "; " + Translation.y.ToString() + ")";
         }
 
-        public ActionTransformTranslate():base(ActionTypes.TransformTranslate) {
+        public ActionTranslate():base(ActionTypes.Translate) {
             Translation = new Vector3();
             TextInList = FormText();
             Content = FormContent();

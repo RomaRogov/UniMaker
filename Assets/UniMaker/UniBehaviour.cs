@@ -3,5 +3,8 @@ using System.Collections;
 
 public class UniBehaviour : MonoBehaviour
 {
-    //Some methods to overrie
+    protected virtual void Update()
+    {
+        
+    }
 }
