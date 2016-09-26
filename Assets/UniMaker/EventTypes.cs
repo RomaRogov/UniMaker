@@ -3,6 +3,7 @@
 	public enum EventTypes
 	{
 		Start,
-		Update
+		Update,
+        KeyPressed
 	}
 }

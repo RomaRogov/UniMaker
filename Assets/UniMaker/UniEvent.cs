@@ -10,11 +10,19 @@ namespace UniMaker
     {
         public EventTypes Type;
         public List<ActionBase> Actions;
+        public JSONObject Options;
+
+        private Dictionary<EventTypes, string> codeFormats = new Dictionary<EventTypes, string>()
+        {
+            {EventTypes.Start, "void Start() {" },
+            {EventTypes.Update, "protected override void Update() { base.Update();" },
+            {EventTypes.KeyPressed, "protected override void KeyPressed(KeyCode which) { if (which != {0}) { return; }" },
+        };
 
         public UniEvent(string options, string content)
         {
-            JSONObject eventOptionsJSON = new JSONObject(options);
-            Type = (EventTypes)Enum.Parse(typeof(EventTypes), eventOptionsJSON.GetField("type").str);
+            Options = new JSONObject(options);
+            Type = (EventTypes)Enum.Parse(typeof(EventTypes), Options.GetField("type").str);
 
             Actions = new List<ActionBase>();
 
@@ -60,14 +68,7 @@ namespace UniMaker
             //Write event data
             strWriter.WriteLine(UniEditorAbstract.TabSpaces + UniEditorAbstract.EventBeginText + "%{\"type\":\"" + Type.ToString() + "\"}");
             //Write method header
-            if (Type == EventTypes.Update)
-            {
-                strWriter.WriteLine(UniEditorAbstract.TabSpaces + "protected override void " + Type.ToString() + "() { base.Update();");
-            }
-            else
-            {
-                strWriter.WriteLine(UniEditorAbstract.TabSpaces + "void " + Type.ToString() + "() {");
-            }
+            strWriter.WriteLine(UniEditorAbstract.TabSpaces + string.Format(codeFormats[Type], Options.GetField("args").list.ConvertAll<string>(arg => arg.str)));
             //Write actions
             Actions.ForEach(a =>
             {

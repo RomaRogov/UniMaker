@@ -7,4 +7,6 @@ public class UniBehaviour : MonoBehaviour
     {
         
     }
+
+    protected virtual void KeyPressed(KeyCode which) { }
 }
