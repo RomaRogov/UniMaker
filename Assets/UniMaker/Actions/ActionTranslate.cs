@@ -7,24 +7,14 @@ using UnityEditor;
 
 namespace UniMaker.Actions
 {
-	public class ActionTranslate : ActionBase
+	public class ActionTranslate : UniAction
 	{
 		public Vector3 uiTranslation;
 		public Vector3 Translation;
 
-        protected override string FormContent()
+        public ActionTranslate():base(ActionTypes.Translate)
         {
-            return doubleTabSpaces + "transform.Translate(new Vector3(" + Translation.x.ToString() + "," + Translation.y.ToString() + "," + Translation.z.ToString() + "));";
-        }
-
-        protected override string FormText()
-        {
-            return TextInList = "Translate to (" + Translation.x.ToString() + "; " + Translation.y.ToString() + ")";
-        }
-
-        public ActionTranslate():base(ActionTypes.Translate) {
             Translation = new Vector3();
-            TextInList = FormText();
             Content = FormContent();
             Options = new JSONObject();
             Options.AddField("type", Type.ToString());
@@ -40,6 +30,16 @@ namespace UniMaker.Actions
             Content = FormContent();
         }
 
+        protected override string FormContent()
+        {
+            return doubleTabSpaces + "transform.Translate(new Vector3(" + Translation.x.ToString() + "f," + Translation.y.ToString() + "f," + Translation.z.ToString() + "f));";
+        }
+
+        protected override string FormText()
+        {
+            return "Translate to (" + Translation.x.ToString() + "; " + Translation.y.ToString() + "; " + Translation.z.ToString() + ")";
+        }
+
         public override void DrawGUIProperty ()
 		{
 			#if UNITY_EDITOR
@@ -53,7 +53,9 @@ namespace UniMaker.Actions
 		public override void ApplyGUI ()
 		{
 			Translation = uiTranslation;
-			TextInList = "Translate to (" + Translation.x.ToString() + "; " + Translation.y.ToString() + ")";
+            Options.SetField("x", Translation.x);
+            Options.SetField("y", Translation.y);
+            Options.SetField("z", Translation.z);
             Content = FormContent();
         }
 		

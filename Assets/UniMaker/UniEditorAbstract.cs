@@ -2,6 +2,7 @@
 using System.IO;
 using System;
 using System.Collections.Generic;
+using UniMaker.Events;
 
 namespace UniMaker
 {
@@ -44,6 +45,14 @@ namespace UniMaker
         public int EventCount { get { return Events.Count; } }
 
         private enum ParsingMode { USINGS, CLASS, ENDCLASS, VAR, EVENT, ENDEVENT };
+
+        public UniEditorAbstract(string fileName)
+        {
+            FileName = fileName;
+            Usings = new List<string>();
+            Variables = new List<UniVariable>();
+            Events = new List<UniEvent>();
+        }
 
         public UniEditorAbstract(string behaviourCode, string fileName)
         {
@@ -94,7 +103,10 @@ namespace UniMaker
                         eventContent += currentLine + "\n";
                         break;
                     case ParsingMode.ENDEVENT:
-                        Events.Add(new UniEvent(eventOptions, eventContent));
+                        JSONObject eventOptionsJSON = new JSONObject(eventOptions);
+                        UniEvent newEvent = UniEvent.GetEventInstanceByType(eventOptionsJSON.GetField("type").str);
+                        newEvent.SetOptionsAndContent(eventOptions, eventContent);
+                        Events.Add(newEvent);
                         eventContent = "";
                         break;
                 }

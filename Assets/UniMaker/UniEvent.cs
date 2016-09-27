@@ -4,27 +4,38 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-namespace UniMaker
+namespace UniMaker.Events
 {
     public class UniEvent
     {
         public EventTypes Type;
-        public List<ActionBase> Actions;
+        public List<UniAction> Actions;
         public JSONObject Options;
+        public string TextInList { get { return FormText(); } }
+        public int Priority;
 
-        private Dictionary<EventTypes, string> codeFormats = new Dictionary<EventTypes, string>()
+        public UniEvent(EventTypes type)
         {
-            {EventTypes.Start, "void Start() {" },
-            {EventTypes.Update, "protected override void Update() { base.Update();" },
-            {EventTypes.KeyPressed, "protected override void KeyPressed(KeyCode which) { if (which != {0}) { return; }" },
-        };
+            Type = type;
+            Actions = new List<UniAction>();
 
-        public UniEvent(string options, string content)
+            Options = new JSONObject();
+            Options.AddField("type", Type.ToString());
+        }
+
+        public void SetArgs(List<string> args)
+        {
+            JSONObject argsArr = new JSONObject(JSONObject.Type.ARRAY);
+            args.ForEach(a => argsArr.Add(a));
+            Options.AddField("args", argsArr);
+        }
+
+        public void SetOptionsAndContent(string options, string content)
         {
             Options = new JSONObject(options);
             Type = (EventTypes)Enum.Parse(typeof(EventTypes), Options.GetField("type").str);
 
-            Actions = new List<ActionBase>();
+            Actions = new List<UniAction>();
 
             StringReader strReader = new StringReader(content);
             string currentLine = null;
@@ -47,7 +58,7 @@ namespace UniMaker
                 if (currentLine.StartsWith("//ENDACTION"))
                 {
                     JSONObject actionOptionsJSON = new JSONObject(actionOptions);
-                    ActionBase newAction = (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Actions.Action" + actionOptionsJSON.GetField("type").str).Unwrap();
+                    UniAction newAction = UniAction.GetActionInstanceByType(actionOptionsJSON.GetField("type").str);
                     newAction.SetOptionsAndContent(actionOptions, actionContent);
                     Actions.Add(newAction);
                 }
@@ -66,9 +77,13 @@ namespace UniMaker
             string doubleTabSpaces = UniEditorAbstract.TabSpaces + UniEditorAbstract.TabSpaces;
 
             //Write event data
-            strWriter.WriteLine(UniEditorAbstract.TabSpaces + UniEditorAbstract.EventBeginText + "%{\"type\":\"" + Type.ToString() + "\"}");
+            strWriter.WriteLine(UniEditorAbstract.TabSpaces + UniEditorAbstract.EventBeginText + "%" + Options.ToString());
             //Write method header
-            strWriter.WriteLine(UniEditorAbstract.TabSpaces + string.Format(codeFormats[Type], Options.GetField("args").list.ConvertAll<string>(arg => arg.str)));
+            if (Options.HasField("args"))
+            {
+                object[] args = Options.GetField("args").list.ConvertAll<object>(arg => arg.str).ToArray();
+            }
+            strWriter.WriteLine(UniEditorAbstract.TabSpaces + FormHeader());
             //Write actions
             Actions.ForEach(a =>
             {
@@ -82,6 +97,19 @@ namespace UniMaker
             //Write event end
             strWriter.WriteLine(UniEditorAbstract.TabSpaces + UniEditorAbstract.EventEndText);
             strWriter.WriteLine(UniEditorAbstract.TabSpaces + "}");
+        }
+
+        protected virtual string FormText() { return ""; }
+        protected virtual string FormHeader() { return ""; }
+
+        public static UniEvent GetEventInstanceByType(EventTypes type)
+        {
+            return (UniEvent)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Events.Event" + type.ToString()).Unwrap();
+        }
+
+        public static UniEvent GetEventInstanceByType(string type)
+        {
+            return (UniEvent)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Events.Event" + type).Unwrap();
         }
     }
 }

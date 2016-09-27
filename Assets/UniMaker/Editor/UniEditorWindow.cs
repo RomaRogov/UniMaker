@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
 using UniMaker.Actions;
+using UniMaker.Events;
 
 namespace UniMaker
 {
@@ -39,6 +40,7 @@ namespace UniMaker
             if ((data != null) && !data.ParseFailed)
             {
                 data.CombineScript(new StreamWriter(data.FileName, false));
+                AssetDatabase.ImportAsset(data.FileName);
             }
             data = null;
 
@@ -61,7 +63,7 @@ namespace UniMaker
 
 			EditorGUILayout.BeginHorizontal();
 
-			EditorGUILayout.BeginVertical(GUILayout.Width(150));
+			EditorGUILayout.BeginVertical(GUILayout.MaxWidth(210));
 			EditorGUILayout.LabelField("Events:");
 			scrollValue = EditorGUILayout.BeginScrollView(scrollValue, GUI.skin.box);
 			if (data.EventCount == 0)
@@ -70,12 +72,25 @@ namespace UniMaker
 			}
 			for (int i = 0; i < data.EventCount; i++)
 			{
-				DrawEvent(IconCacher.GetIcon<EventTypes>(data.Events[i].Type), data.Events[i].Type.ToString(), i);
+				DrawEvent(IconCacher.GetIcon<EventTypes>(data.Events[i].Type), data.Events[i].TextInList, i);
 			}
 			EditorGUILayout.EndScrollView();
-			if (GUILayout.Button("Add event"))
+
+            EventTypes eventToAdd = EventTypes.None;
+            List<string> options = new List<string>();
+            options.Add("None");
+            options.Add("Start");
+            options.Add("Update");
+            List<string> keyNames = new List<string>() { "Left", "Right", "Up", "Down", "Ctrl", "Alt", "Shift", "Space", "Enter", "Backspace", "Escape", "Home", "End", "PageUp", "PageDown", "Delete", "Insert", "Any Key", "No Key" };
+            keyNames.ForEach(k => options.Add("Key Press/<" + k + ">"));
+            keyNames.ForEach(k => options.Add("Key Down/<" + k + ">"));
+            keyNames.ForEach(k => options.Add("Key Up/<" + k + ">"));
+            int selectedEvent = EditorGUILayout.Popup("Add event:", 0, options.ToArray());
+            eventToAdd = (EventTypes)(selectedEvent);
+            if (eventToAdd != EventTypes.None)
 			{
-				data.Events.Add(new UniEvent("{\"type\":\"" + "Update" + "\"}", ""));
+                UniEvent newEvent = UniEvent.GetEventInstanceByType(eventToAdd);
+                data.Events.Add(newEvent);
 				SelectEvent(data.EventCount - 1);
 				SetObjectDirty();
 			}
@@ -115,7 +130,7 @@ namespace UniMaker
 						if (dropData is ActionTypes && (data.EventCount > 0))
 						{
 							DragAndDrop.AcceptDrag();
-                            data.Events[selectedEventIndex].Actions.Add(GetActionInstanceByType((ActionTypes)dropData));
+                            data.Events[selectedEventIndex].Actions.Add(UniAction.GetActionInstanceByType((ActionTypes)dropData));
 							DragAndDrop.SetGenericData("ActionTypes", null);
 							SetObjectDirty();
 						}
@@ -145,22 +160,24 @@ namespace UniMaker
 			bool active = index == selectedEventIndex;
 
 			Color prevColor = GUI.backgroundColor;
-			GUI.backgroundColor = active ? Color.blue : prevColor;
+			GUI.backgroundColor = active ? new Color(.5f, .5f, 1, 1) : prevColor;
 
-			Rect area = EditorGUILayout.BeginHorizontal(GUILayout.MaxHeight(itemSize));
-			if (EditorGUI.Toggle(area, active, GUI.skin.box) && !active)
-			{
-				SelectEvent(index);
-			}
-			EditorGUILayout.Space();
-			GUILayout.Label(icon, GUILayout.Width(itemSize), GUILayout.Height(itemSize));
-			EditorGUILayout.BeginVertical(GUILayout.MaxHeight(itemSize));
-			GUILayout.FlexibleSpace();
-			EditorGUILayout.LabelField(eventName, GUILayout.MinWidth(130));
-			GUILayout.FlexibleSpace();
-			EditorGUILayout.EndVertical();
-			GUILayout.FlexibleSpace();
-	        EditorGUILayout.EndHorizontal();
+			Rect area = EditorGUILayout.BeginHorizontal();
+            if (EditorGUI.Toggle(area, active, GUI.skin.box) && !active)
+            {
+                SelectEvent(index);
+            }
+
+            //EditorGUILayout.LabelField(new GUIContent(icon), GUILayout.MaxWidth(itemSize));
+            EditorGUILayout.BeginVertical(GUILayout.Height(itemSize));
+            GUILayout.FlexibleSpace();
+            GUI.skin.label.wordWrap = true;
+            EditorGUILayout.LabelField(new GUIContent(eventName, icon), GUI.skin.label, GUILayout.Height(itemSize));
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndVertical();
+            GUILayout.FlexibleSpace();
+
+            EditorGUILayout.EndHorizontal();
 
 			GUI.backgroundColor = prevColor;
 		}
@@ -169,10 +186,10 @@ namespace UniMaker
 		{
 			selectedEventIndex = selectIndex;
 
-			list = new ReorderableList(data.Events[selectedEventIndex].Actions, typeof(ActionBase));
+			list = new ReorderableList(data.Events[selectedEventIndex].Actions, typeof(UniAction));
 			list.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
 			{
-				ActionBase element = data.Events[selectedEventIndex].Actions[index];
+				UniAction element = data.Events[selectedEventIndex].Actions[index];
 				rect.y -= 1;
 				EditorGUI.LabelField(new Rect(rect.x, rect.y, actionItemSize, actionItemSize), new GUIContent(IconCacher.GetIcon<ActionTypes>(element.Type)));
 				rect.y += 3;
@@ -225,11 +242,6 @@ namespace UniMaker
 			EditorGUILayout.EndHorizontal();
 			GUILayout.FlexibleSpace();
 			EditorGUILayout.EndVertical();
-		}
-
-		public static ActionBase GetActionInstanceByType(ActionTypes type)
-		{
-			return (ActionBase)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Actions.Action" + type.ToString()).Unwrap();
 		}
 	}
 }

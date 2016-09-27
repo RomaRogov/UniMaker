@@ -4,16 +4,16 @@ using System.Collections;
 
 namespace UniMaker.Actions
 {
-	public class ActionBase
+	public class UniAction
 	{
 		public ActionTypes Type;
         public JSONObject Options;
         public string Content;
-		public string TextInList = "BASE ACTION";
+		public string TextInList { get { return FormText(); } }
 
         protected string doubleTabSpaces = UniEditorAbstract.TabSpaces + UniEditorAbstract.TabSpaces;
 
-        public ActionBase(ActionTypes type)
+        public UniAction(ActionTypes type)
 		{
             Type = type;
 		}
@@ -25,5 +25,15 @@ namespace UniMaker.Actions
         public virtual void DrawGUIProperty() { }
         public virtual void ApplyGUI() { }
         public virtual void ResetGUI() { }
-	}
+
+        public static UniAction GetActionInstanceByType(ActionTypes type)
+        {
+            return (UniAction)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Actions.Action" + type.ToString()).Unwrap();
+        }
+
+        public static UniAction GetActionInstanceByType(string type)
+        {
+            return (UniAction)Activator.CreateInstance("Assembly-CSharp", "UniMaker.Actions.Action" + type).Unwrap();
+        }
+    }
 }
