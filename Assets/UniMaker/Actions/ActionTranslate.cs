@@ -9,59 +9,72 @@ namespace UniMaker.Actions
 {
 	public class ActionTranslate : UniAction
 	{
-		public Vector3 uiTranslation;
-		public Vector3 Translation;
+        public string X;
+        public string Y;
+        public string Z;
+
+        public string uiX;
+        public string uiY;
+        public string uiZ;
 
         public ActionTranslate():base(ActionTypes.Translate)
         {
-            Translation = new Vector3();
             Content = FormContent();
             Options = new JSONObject();
             Options.AddField("type", Type.ToString());
-            Options.AddField("x", 0f);
-            Options.AddField("y", 0f);
-            Options.AddField("z", 0f);
+            Options.AddField("x", "0f");
+            Options.AddField("y", "0f");
+            Options.AddField("z", "0f");
         }
 
         public override void SetOptionsAndContent(string options, string content)
         {
             Options = new JSONObject(options);
-            Translation = new Vector3(Options.GetField("x").f, Options.GetField("y").f, Options.GetField("z").f);
+            uiX = X = Options.GetField("x").str;
+            uiY = Y = Options.GetField("y").str;
+            uiZ = Z = Options.GetField("z").str;
             Content = FormContent();
         }
 
         protected override string FormContent()
         {
-            return doubleTabSpaces + "transform.Translate(new Vector3(" + Translation.x.ToString() + "f," + Translation.y.ToString() + "f," + Translation.z.ToString() + "f));";
+            return doubleTabSpaces + "transform.Translate(new Vector3((float)" + X + ",(float)" + Y + ",(float)" + Z + "));";
         }
 
         protected override string FormText()
         {
-            return "Translate to (" + Translation.x.ToString() + "; " + Translation.y.ToString() + "; " + Translation.z.ToString() + ")";
+            return "Translate to (" + X + "; " + Y + "; " + Z + ")";
         }
 
         public override void DrawGUIProperty ()
 		{
 			#if UNITY_EDITOR
 			EditorGUILayout.BeginVertical();
-
-			uiTranslation = EditorGUILayout.Vector3Field("Translation: ", uiTranslation);
-			EditorGUILayout.EndVertical();
+            
+            uiX = EditorGUILayout.TextField("x: ", uiX);
+            uiY = EditorGUILayout.TextField("y: ", uiY);
+            uiZ = EditorGUILayout.TextField("z: ", uiZ);
+            EditorGUILayout.EndVertical();
 			#endif
 		}
 
 		public override void ApplyGUI ()
 		{
-			Translation = uiTranslation;
-            Options.SetField("x", Translation.x);
-            Options.SetField("y", Translation.y);
-            Options.SetField("z", Translation.z);
+            X = uiX;
+            Y = uiY;
+            Z = uiZ;
+
+            Options.SetField("x", X);
+            Options.SetField("y", Y);
+            Options.SetField("z", Z);
             Content = FormContent();
         }
 		
 		public override void ResetGUI ()
 		{
-			uiTranslation = Translation;
-		}
+            uiX = X;
+            uiY = Y;
+            uiZ = Z;
+        }
     }
 }
